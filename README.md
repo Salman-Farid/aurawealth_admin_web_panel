@@ -2,6 +2,13 @@
 
 A fully responsive admin web panel for AuraWealth - a 24 Carat Gold Investment Platform.
 
+## ⭐ **NEW USER? [START HERE →](START_HERE.md)**
+
+Complete setup in 3 simple steps:
+1. Install Flutter → 2. Configure API → 3. Run the app
+
+---
+
 ## 🎯 Features
 
 - **Dashboard**: Real-time statistics, analytics, and recent transactions
@@ -172,8 +179,29 @@ firebase deploy --only hosting
 
 ## 📖 Documentation
 
+### Quick Access
+- **[START_HERE.md](START_HERE.md)** ⭐ - First-time setup (start here!)
+- **[QUICKSTART.md](QUICKSTART.md)** - 5-minute setup guide
+- **[GETTING_STARTED.md](GETTING_STARTED.md)** - Usage guide
+- **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** - Common issues & solutions
+
+### Complete Documentation
+- **[INSTALLATION.md](INSTALLATION.md)** - Detailed installation steps
+- **[CONFIG.md](CONFIG.md)** - Configuration instructions
+- **[DEPLOYMENT.md](DEPLOYMENT.md)** - Deployment options (Firebase, Netlify, AWS, etc.)
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** - Technical architecture
+- **[FEATURES.md](FEATURES.md)** - Complete feature documentation
+- **[API_INTEGRATION.md](API_INTEGRATION.md)** - API integration reference
+- **[SCREENS.md](SCREENS.md)** - Visual screen overview
+- **[PROJECT_SUMMARY.md](PROJECT_SUMMARY.md)** - Project summary
+- **[CHANGELOG.md](CHANGELOG.md)** - Version history
+
+### Reference Documentation
 - API Documentation: `assets/api_documentation/README.md`
 - MVP Building Guide: `assets/pakashona-mvp-building-guide/`
+
+### Setup Tools
+- **[setup_check.sh](setup_check.sh)** - Automated setup verification script
 
 ## 🤝 Contributing
 
