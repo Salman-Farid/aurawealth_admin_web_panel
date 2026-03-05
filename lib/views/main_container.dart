@@ -30,13 +30,13 @@ class MainContainer extends StatelessWidget {
     final authController = Get.find<AuthController>();
     final storage = StorageService();
 
-    // Set initial route based on current route
+    // Sync current route with NavigationController on first build
     final currentRoute = Get.currentRoute;
-    if (currentRoute != navigationController.currentRoute.value) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (currentRoute != navigationController.currentRoute.value) {
         navigationController.navigateTo(currentRoute);
-      });
-    }
+      }
+    });
 
     final isMobile = Responsive.isMobile(context);
     final isTablet = Responsive.isTablet(context);
@@ -62,7 +62,7 @@ class MainContainer extends StatelessWidget {
             padding: EdgeInsets.symmetric(horizontal: 8),
             child: PopupMenuButton(
               icon: CircleAvatar(
-                backgroundColor: AppColors.primary.withOpacity(0.1),
+                backgroundColor: AppColors.primary.withValues(alpha: 0.1),
                 child: Icon(Icons.person, color: AppColors.primary),
               ),
               itemBuilder: (context) => [
@@ -130,7 +130,21 @@ class MainContainer extends StatelessWidget {
           Expanded(
             child: Container(
               color: AppColors.background,
-              child: Obx(() => _getScreen(navigationController.currentRoute.value)),
+              child: Obx(() => AnimatedSwitcher(
+                duration: Duration(milliseconds: 300),
+                switchInCurve: Curves.easeInOut,
+                switchOutCurve: Curves.easeInOut,
+                transitionBuilder: (Widget child, Animation<double> animation) {
+                  return FadeTransition(
+                    opacity: animation,
+                    child: child,
+                  );
+                },
+                child: Container(
+                  key: ValueKey(navigationController.currentRoute.value),
+                  child: _getScreen(navigationController.currentRoute.value),
+                ),
+              )),
             ),
           ),
         ],

@@ -4,6 +4,7 @@ import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/utils/responsive.dart';
 import '../../routes/app_routes.dart';
+import '../../controllers/navigation_controller.dart';
 
 class MenuItem {
   final String title;
@@ -60,7 +61,10 @@ class SidebarMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final currentRoute = Get.currentRoute;
+    // Get NavigationController if it exists, otherwise navigation won't work
+    final navigationController = Get.isRegistered<NavigationController>()
+        ? Get.find<NavigationController>()
+        : null;
 
     return Container(
       color: AppColors.background,
@@ -95,50 +99,53 @@ class SidebarMenu extends StatelessWidget {
 
           // Menu Items
           Expanded(
-            child: ListView.builder(
-              padding: EdgeInsets.symmetric(vertical: 8),
-              itemCount: menuItems.length,
-              itemBuilder: (context, index) {
-                final item = menuItems[index];
-                final isSelected = currentRoute == item.route;
+            child: navigationController != null
+                ? Obx(() => ListView.builder(
+                      padding: EdgeInsets.symmetric(vertical: 8),
+                      itemCount: menuItems.length,
+                      itemBuilder: (context, index) {
+                        final item = menuItems[index];
+                        final isSelected = navigationController.isSelected(item.route);
 
-                return Container(
-                  margin: EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? AppColors.primary.withOpacity(0.1)
-                        : Colors.transparent,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: ListTile(
-                    leading: Icon(
-                      item.icon,
-                      color: isSelected ? AppColors.primary : AppColors.grey600,
-                    ),
-                    title: Text(
-                      item.title,
-                      style: TextStyle(
-                        color: isSelected
-                            ? AppColors.primary
-                            : AppColors.textPrimary,
-                        fontWeight:
-                            isSelected ? FontWeight.w600 : FontWeight.normal,
-                      ),
-                    ),
-                    onTap: () {
-                      Get.toNamed(item.route);
-                      // Close drawer on mobile
-                      if (Responsive.isMobile(context)) {
-                        Navigator.of(context).pop();
-                      }
-                    },
-                  ),
-                );
-              },
-            ),
+                        return Container(
+                          margin: EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? AppColors.primary.withValues(alpha: 0.1)
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: ListTile(
+                            leading: Icon(
+                              item.icon,
+                              color: isSelected ? AppColors.primary : AppColors.grey600,
+                            ),
+                            title: Text(
+                              item.title,
+                              style: TextStyle(
+                                color: isSelected
+                                    ? AppColors.primary
+                                    : AppColors.textPrimary,
+                                fontWeight:
+                                    isSelected ? FontWeight.w600 : FontWeight.normal,
+                              ),
+                            ),
+                            onTap: () {
+                              // Use NavigationController instead of Get.toNamed
+                              navigationController.navigateTo(item.route);
+                              // Close drawer on mobile/tablet
+                              if (Responsive.isMobile(context) || Responsive.isTablet(context)) {
+                                Navigator.of(context).pop();
+                              }
+                            },
+                          ),
+                        );
+                      },
+                    ))
+                : Center(child: CircularProgressIndicator()),
           ),
 
           // Footer
