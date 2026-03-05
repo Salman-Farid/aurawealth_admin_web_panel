@@ -31,10 +31,25 @@ class MainContainer extends StatelessWidget {
     final storage = StorageService();
 
     // Sync current route with NavigationController on first build
-    final currentRoute = Get.currentRoute;
+    // Only override to a non-dashboard route if the URL explicitly says so
+    final urlRoute = Get.currentRoute;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (currentRoute != navigationController.currentRoute.value) {
-        navigationController.navigateTo(currentRoute);
+      const validRoutes = [
+        AppRoutes.dashboard,
+        AppRoutes.transactions,
+        AppRoutes.users,
+        AppRoutes.goldManagement,
+        AppRoutes.messages,
+        AppRoutes.creditGrams,
+        AppRoutes.redeemCode,
+      ];
+      if (validRoutes.contains(urlRoute) &&
+          urlRoute != AppRoutes.dashboard &&
+          urlRoute != navigationController.currentRoute.value) {
+        navigationController.navigateTo(urlRoute);
+      } else if (!validRoutes.contains(urlRoute)) {
+        // Unknown/root route — force dashboard
+        navigationController.navigateTo(AppRoutes.dashboard);
       }
     });
 

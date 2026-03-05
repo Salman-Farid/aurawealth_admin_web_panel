@@ -7,15 +7,15 @@ class TransactionController extends GetxController {
 
   final RxBool isLoading = false.obs;
   final RxString errorMessage = ''.obs;
-  final RxList<Transaction> transactions = <Transaction>[].obs;
+  final RxList<Transaction> transactions         = <Transaction>[].obs;
   final RxList<Transaction> filteredTransactions = <Transaction>[].obs;
-  
-  // Filters
+
+  // Filters — stored UPPERCASE to match model
   final RxString selectedStatus = ''.obs;
-  final RxString selectedType = ''.obs;
+  final RxString selectedType   = ''.obs;
   final Rx<DateTime?> startDate = Rx<DateTime?>(null);
-  final Rx<DateTime?> endDate = Rx<DateTime?>(null);
-  final RxString searchQuery = ''.obs;
+  final Rx<DateTime?> endDate   = Rx<DateTime?>(null);
+  final RxString searchQuery    = ''.obs;
 
   @override
   void onInit() {
@@ -25,11 +25,18 @@ class TransactionController extends GetxController {
 
   Future<void> loadTransactions({String? status}) async {
     try {
-      isLoading.value = true;
+      isLoading.value    = true;
       errorMessage.value = '';
 
-      final data = await _apiService.getAdminDashboard(status: status);
-      transactions.value = data.map((json) => Transaction.fromJson(json)).toList();
+      final raw = await _apiService.getAdminDashboard(status: status);
+      final all = raw
+          .whereType<Map<String, dynamic>>()
+          .map((json) => Transaction.fromJson(json))
+          .toList();
+
+      // Sort newest first
+      all.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      transactions.value = all;
       applyFilters();
     } catch (e) {
       errorMessage.value = e.toString().replaceAll('Exception: ', '');
@@ -40,45 +47,45 @@ class TransactionController extends GetxController {
 
   void applyFilters() {
     var filtered = transactions.toList();
-    
-    // Filter by status
+
+    // Status — model stores UPPERCASE
     if (selectedStatus.value.isNotEmpty) {
-      filtered = filtered.where((t) => 
-          t.status.toLowerCase() == selectedStatus.value.toLowerCase()
-      ).toList();
+      filtered = filtered
+          .where((t) => t.status == selectedStatus.value.toUpperCase())
+          .toList();
     }
-    
-    // Filter by type
+
+    // Type — model stores UPPERCASE
     if (selectedType.value.isNotEmpty) {
-      filtered = filtered.where((t) => t.type == selectedType.value).toList();
+      filtered = filtered
+          .where((t) => t.type == selectedType.value.toUpperCase())
+          .toList();
     }
-    
-    // Filter by date range
+
+    // Date range
     if (startDate.value != null) {
-      filtered = filtered.where((t) => 
-          t.createdAt.isAfter(startDate.value!) || 
-          t.createdAt.isAtSameMomentAs(startDate.value!)
-      ).toList();
+      filtered = filtered
+          .where((t) => !t.createdAt.isBefore(startDate.value!))
+          .toList();
     }
-    
     if (endDate.value != null) {
-      filtered = filtered.where((t) => 
-          t.createdAt.isBefore(endDate.value!.add(Duration(days: 1)))
-      ).toList();
+      filtered = filtered
+          .where((t) => t.createdAt.isBefore(
+              endDate.value!.add(const Duration(days: 1))))
+          .toList();
     }
-    
-    // Filter by search query
+
+    // Search
     if (searchQuery.value.isNotEmpty) {
-      final query = searchQuery.value.toLowerCase();
-      filtered = filtered.where((t) => 
-          t.id.toLowerCase().contains(query) ||
-          t.type.toLowerCase().contains(query) ||
-          (t.code?.toLowerCase().contains(query) ?? false) ||
-          (t.userName?.toLowerCase().contains(query) ?? false) ||
-          (t.userEmail?.toLowerCase().contains(query) ?? false)
-      ).toList();
+      final q = searchQuery.value.toLowerCase();
+      filtered = filtered.where((t) =>
+          t.id.toLowerCase().contains(q) ||
+          t.type.toLowerCase().contains(q) ||
+          (t.code?.toLowerCase().contains(q) ?? false) ||
+          (t.userName?.toLowerCase().contains(q) ?? false) ||
+          (t.userEmail?.toLowerCase().contains(q) ?? false)).toList();
     }
-    
+
     filteredTransactions.value = filtered;
   }
 
@@ -94,7 +101,7 @@ class TransactionController extends GetxController {
 
   void setDateRange(DateTime? start, DateTime? end) {
     startDate.value = start;
-    endDate.value = end;
+    endDate.value   = end;
     applyFilters();
   }
 
@@ -105,34 +112,36 @@ class TransactionController extends GetxController {
 
   void clearFilters() {
     selectedStatus.value = '';
-    selectedType.value = '';
-    startDate.value = null;
-    endDate.value = null;
-    searchQuery.value = '';
+    selectedType.value   = '';
+    startDate.value      = null;
+    endDate.value        = null;
+    searchQuery.value    = '';
     applyFilters();
   }
 
   Future<void> approveTransaction(String txId, {String? note}) async {
     try {
       await _apiService.approveTransaction(txId, note: note);
-      Get.snackbar('Success', 'Transaction approved successfully');
+      Get.snackbar('Success', 'Transaction approved successfully',
+          snackPosition: SnackPosition.TOP);
       loadTransactions();
     } catch (e) {
-      Get.snackbar('Error', e.toString().replaceAll('Exception: ', ''));
+      Get.snackbar('Error', e.toString().replaceAll('Exception: ', ''),
+          snackPosition: SnackPosition.TOP);
     }
   }
 
   Future<void> rejectTransaction(String txId, {String? note}) async {
     try {
       await _apiService.rejectTransaction(txId, note: note);
-      Get.snackbar('Success', 'Transaction rejected successfully');
+      Get.snackbar('Success', 'Transaction rejected successfully',
+          snackPosition: SnackPosition.TOP);
       loadTransactions();
     } catch (e) {
-      Get.snackbar('Error', e.toString().replaceAll('Exception: ', ''));
+      Get.snackbar('Error', e.toString().replaceAll('Exception: ', ''),
+          snackPosition: SnackPosition.TOP);
     }
   }
 
-  void refresh() {
-    loadTransactions();
-  }
+  void refresh() => loadTransactions();
 }

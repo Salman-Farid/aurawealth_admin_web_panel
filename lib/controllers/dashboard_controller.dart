@@ -7,17 +7,17 @@ class DashboardController extends GetxController {
 
   final RxBool isLoading = false.obs;
   final RxString errorMessage = ''.obs;
-  final RxList<Transaction> recentTransactions = <Transaction>[].obs;
-  final RxList<Transaction> pendingTransactions = <Transaction>[].obs;
-  
+  final RxList<Transaction> recentTransactions    = <Transaction>[].obs;
+  final RxList<Transaction> pendingTransactions   = <Transaction>[].obs;
+
   // Stats
-  final RxInt totalTransactions = 0.obs;
-  final RxInt totalBuyTransactions = 0.obs;
-  final RxInt totalSellTransactions = 0.obs;
-  final RxInt totalExchangeTransactions = 0.obs;
-  final RxInt totalPendingTransactions = 0.obs;
-  final RxDouble totalGoldHoldings = 0.0.obs;
-  final RxDouble totalRevenue = 0.0.obs;
+  final RxInt    totalTransactions         = 0.obs;
+  final RxInt    totalBuyTransactions      = 0.obs;
+  final RxInt    totalSellTransactions     = 0.obs;
+  final RxInt    totalExchangeTransactions = 0.obs;
+  final RxInt    totalPendingTransactions  = 0.obs;
+  final RxDouble totalGoldHoldings         = 0.0.obs;
+  final RxDouble totalRevenue              = 0.0.obs;
 
   @override
   void onInit() {
@@ -30,49 +30,46 @@ class DashboardController extends GetxController {
       isLoading.value = true;
       errorMessage.value = '';
 
-      // Get all transactions
-      final allTransactionsData = await _apiService.getAdminDashboard();
-      final allTransactions = allTransactionsData
+      // Fetch all transactions (no status filter = all)
+      final raw = await _apiService.getAdminDashboard();
+      final all = raw
+          .whereType<Map<String, dynamic>>()
           .map((json) => Transaction.fromJson(json))
           .toList();
 
-      // Calculate stats
-      totalTransactions.value = allTransactions.length;
-      totalBuyTransactions.value = allTransactions
-          .where((t) => t.type.contains('BUY'))
-          .length;
-      totalSellTransactions.value = allTransactions
-          .where((t) => t.type.contains('SELL'))
-          .length;
-      totalExchangeTransactions.value = allTransactions
-          .where((t) => t.type.contains('EXCHANGE'))
-          .length;
-      totalPendingTransactions.value = allTransactions
-          .where((t) => t.status.toLowerCase() == 'pending')
-          .length;
-      
-      // Calculate total gold holdings (sum of all buy transactions minus sell/exchange)
-      final totalBuyGrams = allTransactions
-          .where((t) => t.type.contains('BUY') && t.status.toLowerCase() != 'rejected')
+      // ── counts ─────────────────────────────────────────────────────────
+      totalTransactions.value         = all.length;
+      totalBuyTransactions.value      = all.where((t) => t.type.contains('BUY')).length;
+      totalSellTransactions.value     = all.where((t) => t.type.contains('SELL')).length;
+      totalExchangeTransactions.value = all.where((t) => t.type.contains('EXCHANGE')).length;
+      totalPendingTransactions.value  = all.where((t) => t.status == 'PENDING').length;
+
+      // ── gold holdings ──────────────────────────────────────────────────
+      // Grams added = all BUY transactions that are NOT rejected
+      final buyGrams = all
+          .where((t) => t.type.contains('BUY') && t.status != 'REJECTED')
           .fold(0.0, (sum, t) => sum + t.grams);
-      final totalSellGrams = allTransactions
-          .where((t) => (t.type.contains('SELL') || t.type.contains('EXCHANGE')) 
-              && t.status.toLowerCase() != 'rejected' && t.status.toLowerCase() != 'pending')
+
+      // Grams removed = all SELL/EXCHANGE that are APPROVED or PAID
+      final sellGrams = all
+          .where((t) =>
+              (t.type.contains('SELL') || t.type.contains('EXCHANGE')) &&
+              (t.status == 'APPROVED' || t.status == 'PAID'))
           .fold(0.0, (sum, t) => sum + t.grams);
-      totalGoldHoldings.value = totalBuyGrams - totalSellGrams;
-      
-      // Calculate total revenue (fee amounts from all approved transactions)
-      totalRevenue.value = allTransactions
-          .where((t) => t.status.toLowerCase() != 'rejected')
+
+      totalGoldHoldings.value = (buyGrams - sellGrams).clamp(0.0, double.infinity);
+
+      // ── revenue = sum of all fees from non-rejected transactions ───────
+      totalRevenue.value = all
+          .where((t) => t.status != 'REJECTED')
           .fold(0.0, (sum, t) => sum + t.feeAmount);
 
-      // Get recent transactions (last 10)
-      recentTransactions.value = allTransactions.take(10).toList();
-      
-      // Get pending transactions
-      pendingTransactions.value = allTransactions
-          .where((t) => t.status.toLowerCase() == 'pending')
-          .toList();
+      // ── lists ──────────────────────────────────────────────────────────
+      // Sort by newest first
+      all.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+      recentTransactions.value  = all.take(10).toList();
+      pendingTransactions.value = all.where((t) => t.status == 'PENDING').toList();
 
     } catch (e) {
       errorMessage.value = e.toString().replaceAll('Exception: ', '');
@@ -81,7 +78,5 @@ class DashboardController extends GetxController {
     }
   }
 
-  void refresh() {
-    loadDashboardData();
-  }
+  void refresh() => loadDashboardData();
 }
