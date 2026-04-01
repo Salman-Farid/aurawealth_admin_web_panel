@@ -186,4 +186,19 @@ class ApiService {
     ).timeout(Duration(seconds: AppConstants.apiTimeout));
     return _parseResponse(response) as Map<String, dynamic>;
   }
+
+  // Get All Users
+  Future<List<dynamic>> getAllUsers() async {
+    final url = Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.getAllUsers}');
+    final response = await http.get(
+      url,
+      headers: _getHeaders(),
+    ).timeout(Duration(seconds: AppConstants.apiTimeout));
+    final decoded = _parseResponse(response);
+    if (decoded is List) return decoded;
+    if (decoded is Map && decoded.containsKey('users')) {
+      return decoded['users'] as List<dynamic>;
+    }
+    return [];
+  }
 }

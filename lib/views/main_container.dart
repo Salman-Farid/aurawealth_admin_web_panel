@@ -17,8 +17,7 @@ import 'transactions/transactions_screen.dart';
 import 'users/users_screen.dart';
 import 'gold_management/gold_management_screen.dart';
 import 'messages/messages_screen.dart';
-import 'transactions/credit_grams_screen.dart';
-import 'transactions/redeem_code_screen.dart';
+import 'transactions/store_operations_screen.dart';
 
 class MainContainer extends StatelessWidget {
   MainContainer({Key? key}) : super(key: key);
@@ -40,8 +39,7 @@ class MainContainer extends StatelessWidget {
         AppRoutes.users,
         AppRoutes.goldManagement,
         AppRoutes.messages,
-        AppRoutes.creditGrams,
-        AppRoutes.redeemCode,
+        AppRoutes.storeOperations,
       ];
       if (validRoutes.contains(urlRoute) &&
           urlRoute != AppRoutes.dashboard &&
@@ -179,10 +177,8 @@ class MainContainer extends StatelessWidget {
         return 'Gold Management';
       case AppRoutes.messages:
         return 'Messages';
-      case AppRoutes.creditGrams:
-        return 'Credit Grams';
-      case AppRoutes.redeemCode:
-        return 'Redeem Code';
+      case AppRoutes.storeOperations:
+        return 'Store Operations';
       default:
         return 'Dashboard';
     }
@@ -221,11 +217,8 @@ class MainContainer extends StatelessWidget {
         }
         return MessagesScreen();
 
-      case AppRoutes.creditGrams:
-        return CreditGramsScreen();
-
-      case AppRoutes.redeemCode:
-        return RedeemCodeScreen();
+      case AppRoutes.storeOperations:
+        return StoreOperationsScreen();
 
       default:
         if (!Get.isRegistered<DashboardController>()) {
@@ -235,4 +228,3 @@ class MainContainer extends StatelessWidget {
     }
   }
 }
-

@@ -20,4 +20,7 @@ class ApiEndpoints {
   static const String adminMessages = '/admin/messages';
   static String adminUserMessages(String userId) => '/admin/messages/$userId';
   static String adminReplyMessage(String userId) => '/admin/messages/$userId';
+
+  // User Management
+  static const String getAllUsers = '/admin/users';
 }

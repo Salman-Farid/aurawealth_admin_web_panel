@@ -5,6 +5,5 @@ class AppRoutes {
   static const String users = '/users';
   static const String goldManagement = '/gold-management';
   static const String messages = '/messages';
-  static const String creditGrams = '/credit-grams';
-  static const String redeemCode = '/redeem-code';
+  static const String storeOperations = '/store-operations';
 }

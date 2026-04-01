@@ -56,13 +56,7 @@ class AppPages {
       binding: MainBinding(),
     ),
     GetPage(
-      name: AppRoutes.creditGrams,
-      page: () => MainContainer(),
-      middlewares: [AuthMiddleware()],
-      binding: MainBinding(),
-    ),
-    GetPage(
-      name: AppRoutes.redeemCode,
+      name: AppRoutes.storeOperations,
       page: () => MainContainer(),
       middlewares: [AuthMiddleware()],
       binding: MainBinding(),

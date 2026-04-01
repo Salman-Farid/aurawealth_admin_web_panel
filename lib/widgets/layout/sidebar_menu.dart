@@ -75,14 +75,9 @@ class _SidebarMenuState extends State<SidebarMenu> with SingleTickerProviderStat
       route: AppRoutes.messages,
     ),
     MenuItem(
-      title: 'Credit Grams',
-      icon: Icons.add_card_outlined,
-      route: AppRoutes.creditGrams,
-    ),
-    MenuItem(
-      title: 'Redeem Code',
-      icon: Icons.qr_code_scanner_outlined,
-      route: AppRoutes.redeemCode,
+      title: 'Store Operations',
+      icon: Icons.store_outlined,
+      route: AppRoutes.storeOperations,
     ),
   ];
 
