@@ -220,4 +220,178 @@ class ApiService {
     }
     return [];
   }
+
+  // ============================
+  // NOTIFICATION & DEVICE MANAGEMENT
+  // ============================
+
+  // Send Basic Notification
+  Future<Map<String, dynamic>> sendNotification({
+    String? userId,
+    List<String>? userIds,
+    required String title,
+    required String body,
+    Map<String, dynamic>? data,
+  }) async {
+    final url = Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.sendNotification}');
+    final payload = <String, dynamic>{
+      'title': title,
+      'body': body,
+    };
+    if (userId != null) payload['user_id'] = userId;
+    if (userIds != null) payload['user_ids'] = userIds;
+    if (data != null) payload['data'] = data;
+
+    final response = await http.post(
+      url,
+      headers: _getHeaders(),
+      body: json.encode(payload),
+    ).timeout(Duration(seconds: AppConstants.apiTimeout));
+    return _parseResponse(response) as Map<String, dynamic>;
+  }
+
+  // Send Notification with Image
+  Future<Map<String, dynamic>> sendNotificationWithImage({
+    String? userId,
+    List<String>? userIds,
+    required String title,
+    required String body,
+    String? imageUrl,
+    Map<String, dynamic>? data,
+  }) async {
+    final url = Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.sendNotificationWithImage}');
+    final payload = <String, dynamic>{
+      'title': title,
+      'body': body,
+    };
+    if (userId != null) payload['user_id'] = userId;
+    if (userIds != null) payload['user_ids'] = userIds;
+    if (imageUrl != null) payload['image_url'] = imageUrl;
+    if (data != null) payload['data'] = data;
+
+    final response = await http.post(
+      url,
+      headers: _getHeaders(),
+      body: json.encode(payload),
+    ).timeout(Duration(seconds: AppConstants.apiTimeout));
+    return _parseResponse(response) as Map<String, dynamic>;
+  }
+
+  // Send Broadcast
+  Future<Map<String, dynamic>> sendBroadcast({
+    required String title,
+    required String body,
+    Map<String, dynamic>? data,
+  }) async {
+    final url = Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.sendBroadcast}');
+    final payload = <String, dynamic>{
+      'title': title,
+      'body': body,
+    };
+    if (data != null) payload['data'] = data;
+
+    final response = await http.post(
+      url,
+      headers: _getHeaders(),
+      body: json.encode(payload),
+    ).timeout(Duration(seconds: AppConstants.apiTimeout));
+    return _parseResponse(response) as Map<String, dynamic>;
+  }
+
+  // Broadcast with Image
+  Future<Map<String, dynamic>> broadcastWithImage({
+    required String title,
+    required String body,
+    String? imageUrl,
+    Map<String, dynamic>? data,
+  }) async {
+    final url = Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.broadcastWithImage}');
+    final payload = <String, dynamic>{
+      'title': title,
+      'body': body,
+    };
+    if (imageUrl != null) payload['image_url'] = imageUrl;
+    if (data != null) payload['data'] = data;
+
+    final response = await http.post(
+      url,
+      headers: _getHeaders(),
+      body: json.encode(payload),
+    ).timeout(Duration(seconds: AppConstants.apiTimeout));
+    return _parseResponse(response) as Map<String, dynamic>;
+  }
+
+  // Get All Devices
+  Future<Map<String, dynamic>> getAllDevices({
+    bool activeOnly = true,
+    int skip = 0,
+    int limit = 100,
+  }) async {
+    final queryParams = <String, String>{
+      'active_only': activeOnly.toString(),
+      'skip': skip.toString(),
+      'limit': limit.toString(),
+    };
+    final uri = Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.devicesAll}')
+        .replace(queryParameters: queryParams);
+    
+    final response = await http.get(
+      uri,
+      headers: _getHeaders(),
+    ).timeout(Duration(seconds: AppConstants.apiTimeout));
+    return _parseResponse(response) as Map<String, dynamic>;
+  }
+
+  // Get User Devices
+  Future<Map<String, dynamic>> getUserDevices(String userId) async {
+    final url = Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.devicesUser(userId)}');
+    final response = await http.get(
+      url,
+      headers: _getHeaders(),
+    ).timeout(Duration(seconds: AppConstants.apiTimeout));
+    return _parseResponse(response) as Map<String, dynamic>;
+  }
+
+  // Delete Device
+  Future<Map<String, dynamic>> deleteDevice(String deviceId) async {
+    final url = Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.deleteDevice(deviceId)}');
+    final response = await http.delete(
+      url,
+      headers: _getHeaders(),
+    ).timeout(Duration(seconds: AppConstants.apiTimeout));
+    return _parseResponse(response) as Map<String, dynamic>;
+  }
+
+  // Register Device (Admin)
+  Future<Map<String, dynamic>> registerDevice({
+    required String userId,
+    required String token,
+    required String deviceType,
+    String? deviceName,
+  }) async {
+    final uri = Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.registerDevice}')
+        .replace(queryParameters: {'user_id': userId});
+    final payload = <String, dynamic>{
+      'token': token,
+      'device_type': deviceType,
+    };
+    if (deviceName != null) payload['device_name'] = deviceName;
+
+    final response = await http.post(
+      uri,
+      headers: _getHeaders(),
+      body: json.encode(payload),
+    ).timeout(Duration(seconds: AppConstants.apiTimeout));
+    return _parseResponse(response) as Map<String, dynamic>;
+  }
+
+  // Get Device Statistics
+  Future<Map<String, dynamic>> getDeviceStats() async {
+    final url = Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.deviceStats}');
+    final response = await http.get(
+      url,
+      headers: _getHeaders(),
+    ).timeout(Duration(seconds: AppConstants.apiTimeout));
+    return _parseResponse(response) as Map<String, dynamic>;
+  }
 }

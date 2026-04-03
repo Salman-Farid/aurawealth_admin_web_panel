@@ -7,6 +7,7 @@ import '../controllers/transaction_controller.dart';
 import '../controllers/user_controller.dart';
 import '../controllers/gold_controller.dart';
 import '../controllers/message_controller.dart';
+import '../controllers/notification_controller.dart';
 import '../services/storage_service.dart';
 import '../core/constants/app_colors.dart';
 import '../core/utils/responsive.dart';
@@ -17,6 +18,7 @@ import 'transactions/transactions_screen.dart';
 import 'users/users_screen.dart';
 import 'gold_management/gold_management_screen.dart';
 import 'messages/messages_screen.dart';
+import 'notifications/notifications_screen.dart';
 import 'transactions/store_operations_screen.dart';
 
 class MainContainer extends StatelessWidget {
@@ -39,6 +41,7 @@ class MainContainer extends StatelessWidget {
         AppRoutes.users,
         AppRoutes.goldManagement,
         AppRoutes.messages,
+        AppRoutes.notifications,
         AppRoutes.storeOperations,
       ];
       if (validRoutes.contains(urlRoute) &&
@@ -177,6 +180,8 @@ class MainContainer extends StatelessWidget {
         return 'Gold Management';
       case AppRoutes.messages:
         return 'Messages';
+      case AppRoutes.notifications:
+        return 'Push Notifications';
       case AppRoutes.storeOperations:
         return 'Store Operations';
       default:
@@ -216,6 +221,12 @@ class MainContainer extends StatelessWidget {
           Get.lazyPut<MessageController>(() => MessageController());
         }
         return MessagesScreen();
+
+      case AppRoutes.notifications:
+        if (!Get.isRegistered<NotificationController>()) {
+          Get.lazyPut<NotificationController>(() => NotificationController());
+        }
+        return NotificationsScreen();
 
       case AppRoutes.storeOperations:
         return StoreOperationsScreen();

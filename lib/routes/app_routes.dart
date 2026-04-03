@@ -6,4 +6,5 @@ class AppRoutes {
   static const String goldManagement = '/gold-management';
   static const String messages = '/messages';
   static const String storeOperations = '/store-operations';
+  static const String notifications = '/notifications';
 }

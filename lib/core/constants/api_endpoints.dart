@@ -23,4 +23,15 @@ class ApiEndpoints {
 
   // User Management
   static const String getAllUsers = '/admin/users';
+
+  // Notifications & Device Management
+  static const String sendNotification = '/admin/send-notification';
+  static const String sendNotificationWithImage = '/admin/send-notification-with-image';
+  static const String sendBroadcast = '/admin/send-broadcast';
+  static const String broadcastWithImage = '/admin/broadcast-with-image';
+  static const String devicesAll = '/admin/devices/all';
+  static String devicesUser(String userId) => '/admin/devices/user/$userId';
+  static String deleteDevice(String deviceId) => '/admin/devices/$deviceId';
+  static const String registerDevice = '/admin/devices/register';
+  static const String deviceStats = '/admin/devices/stats';
 }
