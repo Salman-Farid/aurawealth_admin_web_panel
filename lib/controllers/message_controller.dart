@@ -24,7 +24,7 @@ class MessageController extends GetxController {
       isLoading.value = true;
       errorMessage.value = '';
 
-      final data = await _apiService.getMessageThreads();
+      final data = await _apiService.getAdminChatInbox();
       messageThreads.value = data
           .map((json) => MessageThread.fromJson(json))
           .toList();
@@ -41,7 +41,7 @@ class MessageController extends GetxController {
       errorMessage.value = '';
       selectedUserId.value = userId;
 
-      final data = await _apiService.getUserMessages(userId);
+      final data = await _apiService.getAdminChatHistory(userId);
       currentThreadMessages.value = data
           .map((json) => Message.fromJson(json))
           .toList();
@@ -57,8 +57,8 @@ class MessageController extends GetxController {
       isSendingMessage.value = true;
       errorMessage.value = '';
 
-      await _apiService.replyToUser(userId, message);
-      
+      await _apiService.sendAdminChatMessage(userId, message, messageType: 'live');
+
       // Reload messages to show the new reply
       await loadUserMessages(userId);
       await loadMessageThreads(); // Update unread counts

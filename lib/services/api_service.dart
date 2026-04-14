@@ -160,24 +160,24 @@ class ApiService {
     return _parseResponse(response) as Map<String, dynamic>;
   }
 
-  // Get Message Threads
-  Future<List<dynamic>> getMessageThreads() async {
-    final url = Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.adminMessages}');
+  // Get Admin Chat Inbox (all user threads)
+  Future<List<dynamic>> getAdminChatInbox() async {
+    final url = Uri.parse('${AppConstants.baseUrl}/admin/chat/inbox');
     final response = await http.get(
       url,
       headers: _getHeaders(),
     ).timeout(Duration(seconds: AppConstants.apiTimeout));
     final decoded = _parseResponse(response);
     if (decoded is List) return decoded;
-    if (decoded is Map && decoded.containsKey('messages')) {
-      return decoded['messages'] as List<dynamic>;
+    if (decoded is Map && decoded.containsKey('threads')) {
+      return decoded['threads'] as List<dynamic>;
     }
     return [];
   }
 
-  // Get User Messages
-  Future<List<dynamic>> getUserMessages(String userId, {int? limit, int? offset}) async {
-    var url = '${AppConstants.baseUrl}${ApiEndpoints.adminUserMessages(userId)}';
+  // Get Admin Chat History for a User
+  Future<List<dynamic>> getAdminChatHistory(String userId, {int? limit, int? offset}) async {
+    var url = '${AppConstants.baseUrl}/admin/chat/history/$userId';
     final params = <String>[];
     if (limit != null) params.add('limit=$limit');
     if (offset != null) params.add('offset=$offset');
@@ -194,14 +194,29 @@ class ApiService {
     return [];
   }
 
-  // Reply to User Message
-  Future<Map<String, dynamic>> replyToUser(String userId, String message) async {
-    final url = Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.adminReplyMessage(userId)}');
-    final body = json.encode({'body': message});
+  // Send Admin Chat Message (REST fallback)
+  Future<Map<String, dynamic>> sendAdminChatMessage(String userId, String body, {String? subject, String? messageType}) async {
+    final url = Uri.parse('${AppConstants.baseUrl}/admin/chat/send/$userId');
+    final payload = <String, dynamic>{
+      'body': body,
+      'message_type': messageType ?? 'live',
+    };
+    if (subject != null) payload['subject'] = subject;
     final response = await http.post(
       url,
       headers: _getHeaders(),
-      body: body,
+      body: json.encode(payload),
+    ).timeout(Duration(seconds: AppConstants.apiTimeout));
+    return _parseResponse(response) as Map<String, dynamic>;
+  }
+
+  // Mark Admin Chat Thread as Read
+  Future<Map<String, dynamic>> markAdminChatRead(String userId) async {
+    final url = Uri.parse('${AppConstants.baseUrl}/admin/chat/read/$userId');
+    final response = await http.post(
+      url,
+      headers: _getHeaders(),
+      body: json.encode({}),
     ).timeout(Duration(seconds: AppConstants.apiTimeout));
     return _parseResponse(response) as Map<String, dynamic>;
   }
@@ -393,5 +408,26 @@ class ApiService {
       headers: _getHeaders(),
     ).timeout(Duration(seconds: AppConstants.apiTimeout));
     return _parseResponse(response) as Map<String, dynamic>;
+  }
+
+  // Generic POST for chat endpoints
+  Future<Map<String, dynamic>> post(String endpoint, Map<String, dynamic> body) async {
+    final url = Uri.parse(endpoint);
+    final response = await http.post(
+      url,
+      headers: _getHeaders(),
+      body: json.encode(body),
+    ).timeout(Duration(seconds: AppConstants.apiTimeout));
+    return _parseResponse(response) as Map<String, dynamic>;
+  }
+
+  // Generic GET for chat endpoints
+  Future<dynamic> get(String endpoint) async {
+    final url = Uri.parse(endpoint);
+    final response = await http.get(
+      url,
+      headers: _getHeaders(),
+    ).timeout(Duration(seconds: AppConstants.apiTimeout));
+    return _parseResponse(response);
   }
 }

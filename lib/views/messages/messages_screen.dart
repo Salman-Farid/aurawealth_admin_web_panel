@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/message_controller.dart';
+import '../../controllers/admin_chat_controller.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/utils/responsive.dart';
@@ -188,7 +189,17 @@ class MessagesScreen extends StatelessWidget {
               ),
             ],
           ),
-          onTap: () => controller.loadUserMessages(thread.userId),
+          onTap: () {
+            controller.loadUserMessages(thread.userId);
+            // Initialize AdminChatController for this user
+            if (!Get.isRegistered<AdminChatController>(tag: thread.userId)) {
+              Get.put(
+                AdminChatController(targetUserId: thread.userId),
+                tag: thread.userId,
+                permanent: false,
+              );
+            }
+          },
         ),
       );
     });
@@ -199,7 +210,7 @@ class MessagesScreen extends StatelessWidget {
 
     return Column(
       children: [
-        // Conversation Header
+        // Conversation Header with Live/Mail Toggle
         Container(
           padding: EdgeInsets.all(AppConstants.defaultPadding),
           decoration: BoxDecoration(
@@ -225,6 +236,34 @@ class MessagesScreen extends StatelessWidget {
                   );
                 }),
               ),
+              // Live/Mail Toggle
+              Obx(() {
+                final adminChat = Get.find<AdminChatController>(tag: controller.selectedUserId.value);
+                return Row(
+                  children: [
+                    // Connection Status Dot
+                    Container(
+                      width: 8,
+                      height: 8,
+                      margin: EdgeInsets.only(right: 8),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: adminChat.isConnected.value ? Colors.green : Colors.orange,
+                      ),
+                    ),
+                    Text(
+                      adminChat.isConnected.value ? 'Live' : 'Connecting…',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: adminChat.isConnected.value ? Colors.green : Colors.orange,
+                      ),
+                    ),
+                    SizedBox(width: 12),
+                    // Toggle Buttons
+                    _buildMessageTypeToggle(context, adminChat),
+                  ],
+                );
+              }),
               IconButton(
                 icon: Icon(Icons.refresh),
                 onPressed: () => controller.loadUserMessages(
@@ -238,11 +277,14 @@ class MessagesScreen extends StatelessWidget {
         // Messages
         Expanded(
           child: Obx(() {
-            if (controller.isLoading.value && controller.currentThreadMessages.isEmpty) {
+            final adminChat = Get.find<AdminChatController>(tag: controller.selectedUserId.value);
+            final displayMessages = adminChat.filteredMessages;
+
+            if (adminChat.isLoadingHistory.value && displayMessages.isEmpty) {
               return LoadingWidget();
             }
 
-            if (controller.currentThreadMessages.isEmpty) {
+            if (displayMessages.isEmpty) {
               return EmptyStateWidget(
                 message: 'No messages in this conversation',
               );
@@ -251,9 +293,9 @@ class MessagesScreen extends StatelessWidget {
             return ListView.builder(
               padding: EdgeInsets.all(AppConstants.defaultPadding),
               reverse: false,
-              itemCount: controller.currentThreadMessages.length,
+              itemCount: displayMessages.length,
               itemBuilder: (context, index) {
-                final message = controller.currentThreadMessages[index];
+                final message = displayMessages[index];
                 return _buildMessageBubble(message);
               },
             );
@@ -266,9 +308,65 @@ class MessagesScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildMessageTypeToggle(BuildContext context, AdminChatController adminChat) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: AppColors.grey300),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          _buildToggleButton(
+            'Live',
+            adminChat.messageTypeFilter.value == 'live' || adminChat.messageTypeFilter.value == 'all',
+            () => adminChat.setMessageTypeFilter('live'),
+          ),
+          Container(
+            width: 1,
+            height: 24,
+            color: AppColors.grey300,
+          ),
+          _buildToggleButton(
+            'Mail',
+            adminChat.messageTypeFilter.value == 'static' || adminChat.messageTypeFilter.value == 'all',
+            () => adminChat.setMessageTypeFilter('static'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildToggleButton(String label, bool isActive, VoidCallback onPressed) {
+    return SizedBox(
+      width: 60,
+      height: 36,
+      child: TextButton(
+        onPressed: onPressed,
+        style: TextButton.styleFrom(
+          backgroundColor: isActive ? AppColors.primary : Colors.transparent,
+          padding: EdgeInsets.zero,
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: isActive ? Colors.white : AppColors.textSecondary,
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildMessageBubble(Message message) {
     final isFromUser = message.isFromUser;
+    final isStaticMessage = message.isStaticMessage;
 
+    if (isStaticMessage) {
+      return _buildStaticMailBubble(message, isFromUser);
+    }
+
+    // Live message bubble
     return Align(
       alignment: isFromUser ? Alignment.centerLeft : Alignment.centerRight,
       child: Container(
@@ -285,6 +383,25 @@ class MessagesScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (message.attachmentUrl != null)
+              Padding(
+                padding: EdgeInsets.only(bottom: 8),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.network(
+                    message.attachmentUrl!,
+                    width: 200,
+                    height: 200,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      width: 200,
+                      height: 50,
+                      color: AppColors.grey200,
+                      child: Center(child: Text('Image failed to load')),
+                    ),
+                  ),
+                ),
+              ),
             Text(
               message.body,
               style: TextStyle(
@@ -294,7 +411,7 @@ class MessagesScreen extends StatelessWidget {
             ),
             SizedBox(height: 4),
             Text(
-              Formatters.formatRelativeTime(message.createdAt),
+              Formatters.formatRelativeTime(message.parsedCreatedAt),
               style: TextStyle(
                 fontSize: 11,
                 color: AppColors.grey600,
@@ -306,8 +423,124 @@ class MessagesScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildStaticMailBubble(Message message, bool isFromUser) {
+    return Align(
+      alignment: isFromUser ? Alignment.centerLeft : Alignment.centerRight,
+      child: Container(
+        constraints: BoxConstraints(maxWidth: 600),
+        margin: EdgeInsets.only(bottom: 16),
+        decoration: BoxDecoration(
+          color: isFromUser ? Color(0xFFF5F5F5) : Color(0xFFF0F4FF),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isFromUser ? AppColors.grey300 : AppColors.primary.withValues(alpha: 0.3),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 4,
+              offset: Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header with "FORMAL MESSAGE" or "EMAIL" badge
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: isFromUser ? AppColors.grey300 : AppColors.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(12),
+                    topRight: Radius.circular(12),
+                  ),
+                ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'FORMAL MESSAGE',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textSecondary,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          message.subject ?? '(No Subject)',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimary,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(width: 8),
+                  Icon(
+                    Icons.mail_outline,
+                    color: AppColors.textSecondary,
+                    size: 20,
+                  ),
+                ],
+              ),
+            ),
+            // Body
+            Padding(
+              padding: EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    message.body,
+                    style: TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 13,
+                      height: 1.5,
+                    ),
+                  ),
+                  SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        Formatters.formatRelativeTime(message.parsedCreatedAt),
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: AppColors.grey600,
+                        ),
+                      ),
+                      if (message.isRead)
+                        Icon(
+                          Icons.done_all,
+                          size: 14,
+                          color: AppColors.primary,
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildReplyBox(BuildContext context, MessageController controller) {
     final replyController = TextEditingController();
+    final subjectController = TextEditingController();
+    final messageType = 'live'.obs;
 
     return Container(
       padding: EdgeInsets.all(AppConstants.defaultPadding),
@@ -317,49 +550,131 @@ class MessagesScreen extends StatelessWidget {
           top: BorderSide(color: AppColors.grey200, width: 1),
         ),
       ),
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              controller: replyController,
-              maxLines: null,
-              decoration: InputDecoration(
-                hintText: 'Type your reply...',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(24),
+      child: Obx(() {
+        final adminChat = Get.find<AdminChatController>(tag: controller.selectedUserId.value);
+
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Message Type Selector
+            Row(
+              children: [
+                Expanded(
+                  child: Row(
+                    children: [
+                      _buildTypeButton(
+                        '💬 Live',
+                        messageType.value == 'live',
+                        () => messageType.value = 'live',
+                      ),
+                      SizedBox(width: 8),
+                      _buildTypeButton(
+                        '📧 Mail',
+                        messageType.value == 'static',
+                        () => messageType.value = 'static',
+                      ),
+                    ],
+                  ),
                 ),
-                contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              ],
+            ),
+            SizedBox(height: 8),
+            // Subject field (only for Mail)
+            if (messageType.value == 'static')
+              Padding(
+                padding: EdgeInsets.only(bottom: 8),
+                child: TextField(
+                  controller: subjectController,
+                  maxLines: 1,
+                  decoration: InputDecoration(
+                    hintText: 'Subject (required for mail)...',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    prefixIcon: Icon(Icons.subject),
+                  ),
+                ),
               ),
+            // Body field
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: replyController,
+                    maxLines: null,
+                    maxLength: 500,
+                    decoration: InputDecoration(
+                      hintText: messageType.value == 'live'
+                          ? 'Type your message...'
+                          : 'Type your message body...',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      counterText: '',
+                    ),
+                  ),
+                ),
+                SizedBox(width: 8),
+                IconButton(
+                  icon: adminChat.isSending.value
+                      ? SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                          ),
+                        )
+                      : Icon(Icons.send),
+                  color: AppColors.primary,
+                  onPressed: adminChat.isSending.value
+                      ? null
+                      : () {
+                          final text = replyController.text.trim();
+                          if (text.isEmpty) return;
+
+                          adminChat.sendMessage(
+                            body: text,
+                            messageType: messageType.value,
+                            subject: messageType.value == 'static' ? subjectController.text.trim() : null,
+                          ).then((_) {
+                            replyController.clear();
+                            subjectController.clear();
+                          });
+                        },
+                ),
+              ],
+            ),
+          ],
+        );
+      }),
+    );
+  }
+
+  Widget _buildTypeButton(String label, bool isActive, VoidCallback onPressed) {
+    return Expanded(
+      child: Container(
+        height: 40,
+        decoration: BoxDecoration(
+          color: isActive ? AppColors.primary : AppColors.grey100,
+          borderRadius: BorderRadius.circular(8),
+          border: isActive ? Border.all(color: AppColors.primary, width: 2) : null,
+        ),
+        child: TextButton(
+          onPressed: onPressed,
+          style: TextButton.styleFrom(
+            padding: EdgeInsets.zero,
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              color: isActive ? Colors.white : AppColors.textSecondary,
             ),
           ),
-          SizedBox(width: 8),
-          Obx(() => IconButton(
-            icon: controller.isSendingMessage.value
-                ? SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
-                    ),
-                  )
-                : Icon(Icons.send),
-            color: AppColors.primary,
-            onPressed: controller.isSendingMessage.value
-                ? null
-                : () {
-                    final text = replyController.text.trim();
-                    if (text.isEmpty) return;
-
-                    controller.sendReply(
-                      controller.selectedUserId.value,
-                      text,
-                    ).then((_) {
-                      replyController.clear();
-                    });
-                  },
-          )),
-        ],
+        ),
       ),
     );
   }

@@ -16,10 +16,12 @@ class ApiEndpoints {
   static String adminReject(String txId) => '/admin/$txId/reject';
   static String adminPaidStatus(String txId) => '/admin/$txId/paid-status';
 
-  // Messaging
-  static const String adminMessages = '/admin/messages';
-  static String adminUserMessages(String userId) => '/admin/messages/$userId';
-  static String adminReplyMessage(String userId) => '/admin/messages/$userId';
+  // Messaging — Admin Chat (Bearer token auth)
+  static const String adminChatInbox = '/admin/chat/inbox';
+  static String adminChatHistory(String userId) => '/admin/chat/history/$userId';
+  static String adminChatSend(String userId) => '/admin/chat/send/$userId';
+  static String adminChatRead(String userId) => '/admin/chat/read/$userId';
+  static const String adminChatSendWithImage = '/admin/chat/send-with-image';
 
   // User Management
   static const String getAllUsers = '/admin/users';
