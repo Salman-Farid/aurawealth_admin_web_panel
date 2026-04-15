@@ -54,21 +54,21 @@ class _SidebarMenuState extends State<SidebarMenu> with SingleTickerProviderStat
       icon: Icons.dashboard_outlined,
       route: AppRoutes.dashboard,
     ),
-    MenuItem(
-      title: 'Transactions',
-      icon: Icons.receipt_long_outlined,
-      route: AppRoutes.transactions,
-    ),
-    MenuItem(
-      title: 'Users',
-      icon: Icons.people_outline,
-      route: AppRoutes.users,
-    ),
-    MenuItem(
-      title: 'Gold Management',
-      icon: Icons.trending_up_outlined,
-      route: AppRoutes.goldManagement,
-    ),
+    // MenuItem(
+    //   title: 'Transactions',
+    //   icon: Icons.receipt_long_outlined,
+    //   route: AppRoutes.transactions,
+    // ),
+    // MenuItem(
+    //   title: 'Users',
+    //   icon: Icons.people_outline,
+    //   route: AppRoutes.users,
+    // ),
+    // MenuItem(
+    //   title: 'Gold Management',
+    //   icon: Icons.trending_up_outlined,
+    //   route: AppRoutes.goldManagement,
+    // ),
     MenuItem(
       title: 'Messages',
       icon: Icons.message_outlined,
@@ -79,11 +79,11 @@ class _SidebarMenuState extends State<SidebarMenu> with SingleTickerProviderStat
       icon: Icons.notifications_active_outlined,
       route: AppRoutes.notifications,
     ),
-    MenuItem(
-      title: 'Store Operations',
-      icon: Icons.store_outlined,
-      route: AppRoutes.storeOperations,
-    ),
+    // MenuItem(
+    //   title: 'Store Operations',
+    //   icon: Icons.store_outlined,
+    //   route: AppRoutes.storeOperations,
+    // ),
   ];
 
   @override
