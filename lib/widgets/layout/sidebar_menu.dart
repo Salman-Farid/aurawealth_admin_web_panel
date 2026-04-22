@@ -64,11 +64,11 @@ class _SidebarMenuState extends State<SidebarMenu> with SingleTickerProviderStat
     //   icon: Icons.people_outline,
     //   route: AppRoutes.users,
     // ),
-    // MenuItem(
-    //   title: 'Gold Management',
-    //   icon: Icons.trending_up_outlined,
-    //   route: AppRoutes.goldManagement,
-    // ),
+    MenuItem(
+      title: 'Gold Management',
+      icon: Icons.trending_up_outlined,
+      route: AppRoutes.goldManagement,
+    ),
     MenuItem(
       title: 'Messages',
       icon: Icons.message_outlined,
