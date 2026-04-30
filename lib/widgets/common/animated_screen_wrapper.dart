@@ -259,6 +259,7 @@ extension AnimatedListExtension on List<Widget> {
 }
 
 /// A widget that animates its child when it first appears
+/// Uses flutter_animate directly (no AnimatedSwitcher) so it works on first build
 class AnimatedEntrance extends StatelessWidget {
   final Widget child;
   final AnimationType animationType;
@@ -277,13 +278,151 @@ class AnimatedEntrance extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedScreenWrapper(
-      animationType: animationType,
-      delay: delay,
-      duration: duration,
-      curve: curve,
-      child: child,
-    );
+    return _applyAnimation(child);
+  }
+
+  Widget _applyAnimation(Widget widget) {
+    switch (animationType) {
+      case AnimationType.fadeSlideUp:
+        return widget
+            .animate(delay: delay)
+            .fadeIn(duration: duration, curve: curve)
+            .slideY(begin: 0.08, end: 0, duration: duration, curve: curve);
+
+      case AnimationType.fadeSlideDown:
+        return widget
+            .animate(delay: delay)
+            .fadeIn(duration: duration, curve: curve)
+            .slideY(begin: -0.08, end: 0, duration: duration, curve: curve);
+
+      case AnimationType.fadeSlideLeft:
+        return widget
+            .animate(delay: delay)
+            .fadeIn(duration: duration, curve: curve)
+            .slideX(begin: 0.08, end: 0, duration: duration, curve: curve);
+
+      case AnimationType.fadeSlideRight:
+        return widget
+            .animate(delay: delay)
+            .fadeIn(duration: duration, curve: curve)
+            .slideX(begin: -0.08, end: 0, duration: duration, curve: curve);
+
+      case AnimationType.scaleFade:
+        return widget
+            .animate(delay: delay)
+            .fadeIn(duration: duration, curve: curve)
+            .scaleXY(begin: 0.92, end: 1.0, duration: duration, curve: curve);
+
+      case AnimationType.blurFade:
+        return widget
+            .animate(delay: delay)
+            .fadeIn(duration: duration, curve: curve)
+            .blurXY(begin: 4, end: 0, duration: duration, curve: curve);
+
+      case AnimationType.elasticScale:
+        return widget
+            .animate(delay: delay)
+            .fadeIn(duration: duration, curve: curve)
+            .scaleXY(
+              begin: 0.8,
+              end: 1.0,
+              duration: duration,
+              curve: Curves.elasticOut,
+            );
+
+      case AnimationType.flipX:
+        return widget
+            .animate(delay: delay)
+            .fadeIn(duration: duration, curve: curve)
+            .flipH(duration: duration, curve: curve);
+
+      case AnimationType.flipY:
+        return widget
+            .animate(delay: delay)
+            .fadeIn(duration: duration, curve: curve)
+            .flipV(duration: duration, curve: curve);
+
+      case AnimationType.shimmer:
+        return widget
+            .animate(delay: delay)
+            .shimmer(duration: duration * 2, color: Colors.white.withOpacity(0.3));
+
+      case AnimationType.bounce:
+        return widget
+            .animate(delay: delay)
+            .fadeIn(duration: duration, curve: curve)
+            .moveY(
+              begin: -20,
+              end: 0,
+              duration: duration,
+              curve: Curves.bounceOut,
+            );
+
+      case AnimationType.smoothFade:
+        return widget
+            .animate(delay: delay)
+            .fadeIn(duration: duration, curve: Curves.easeInOut);
+
+      case AnimationType.easeInOutSlideUp:
+        return widget
+            .animate(delay: delay)
+            .fadeIn(duration: duration, curve: Curves.easeInOutCubic)
+            .slideY(
+              begin: 0.06,
+              end: 0,
+              duration: duration,
+              curve: Curves.easeInOutCubic,
+            );
+
+      case AnimationType.easeInOutSlideDown:
+        return widget
+            .animate(delay: delay)
+            .fadeIn(duration: duration, curve: Curves.easeInOutCubic)
+            .slideY(
+              begin: -0.06,
+              end: 0,
+              duration: duration,
+              curve: Curves.easeInOutCubic,
+            );
+
+      case AnimationType.easeInOutScale:
+        return widget
+            .animate(delay: delay)
+            .fadeIn(duration: duration, curve: Curves.easeInOutCubic)
+            .scaleXY(
+              begin: 0.95,
+              end: 1.0,
+              duration: duration,
+              curve: Curves.easeInOutCubic,
+            );
+
+      case AnimationType.gentleFade:
+        return widget
+            .animate(delay: delay)
+            .fadeIn(duration: duration, curve: Curves.easeInOutQuad);
+
+      case AnimationType.chatGPTFade:
+        return widget
+            .animate(delay: delay)
+            .fadeIn(duration: duration, curve: Curves.easeInOutCubicEmphasized)
+            .slideY(
+              begin: 0.04,
+              end: 0,
+              duration: duration,
+              curve: Curves.easeInOutCubicEmphasized,
+            );
+
+      case AnimationType.slowFadeSlide:
+        return widget
+            .animate(delay: delay)
+            .fadeIn(duration: duration, curve: Curves.easeOutQuart)
+            .slideY(
+              begin: 0.05,
+              end: 0,
+              duration: duration,
+              curve: Curves.easeOutQuart,
+            );
+    }
   }
 }
 
