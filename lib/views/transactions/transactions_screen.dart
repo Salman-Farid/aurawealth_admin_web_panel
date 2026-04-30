@@ -4,11 +4,13 @@ import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../controllers/transaction_controller.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/utils/responsive.dart';
 import '../../core/utils/formatters.dart';
 import '../../widgets/common/error_widget.dart' as custom_error;
+import '../../widgets/common/animated_screen_wrapper.dart';
 import '../../models/transaction.dart';
 
 // ── Lottie URLs ───────────────────────────────────────────────────────────────
@@ -147,26 +149,28 @@ class TransactionsScreen extends StatelessWidget {
         final rejected = all.where((t) => t.status.toLowerCase() == 'rejected').length;
         final paid     = all.where((t) => t.status.toLowerCase() == 'paid').length;
 
-        if (Responsive.isMobile(context)) {
-          return _MobileLayout(
-            all: all,
-            filtered: filtered,
-            pending: pending,
-            approved: approved,
-            rejected: rejected,
-            paid: paid,
-            ctrl: ctrl,
-          );
-        }
-
-        return _DesktopLayout(
-          all: all,
-          filtered: filtered,
-          pending: pending,
-          approved: approved,
-          rejected: rejected,
-          paid: paid,
-          ctrl: ctrl,
+        return AnimatedEntrance(
+          animationType: AnimationType.chatGPTFade,
+          duration: 700.ms,
+          child: Responsive.isMobile(context)
+              ? _MobileLayout(
+                  all: all,
+                  filtered: filtered,
+                  pending: pending,
+                  approved: approved,
+                  rejected: rejected,
+                  paid: paid,
+                  ctrl: ctrl,
+                )
+              : _DesktopLayout(
+                  all: all,
+                  filtered: filtered,
+                  pending: pending,
+                  approved: approved,
+                  rejected: rejected,
+                  paid: paid,
+                  ctrl: ctrl,
+                ),
         );
       }),
     );
@@ -205,10 +209,14 @@ class _DesktopLayout extends StatelessWidget {
             child: Column(
               children: [
                 // Header
-                _PanelHeader(
-                  title: 'Transactions',
-                  subtitle: '${all.length} total · ${filtered.length} shown',
-                  onRefresh: ctrl.refresh,
+                AnimatedEntrance(
+                  animationType: AnimationType.chatGPTFade,
+                  duration: 700.ms,
+                  child: _PanelHeader(
+                    title: 'Transactions',
+                    subtitle: '${all.length} total · ${filtered.length} shown',
+                    onRefresh: ctrl.refresh,
+                  ),
                 ),
                 Expanded(
                   child: SingleChildScrollView(
@@ -216,30 +224,55 @@ class _DesktopLayout extends StatelessWidget {
                     child: Column(
                       children: [
                         // Status donut chart
-                        _DonutCard(
-                          pending: pending,
-                          approved: approved,
-                          rejected: rejected,
-                          paid: paid,
-                          total: all.length,
+                        AnimatedEntrance(
+                          animationType: AnimationType.chatGPTFade,
+                          delay: 100.ms,
+                          duration: 700.ms,
+                          child: _DonutCard(
+                            pending: pending,
+                            approved: approved,
+                            rejected: rejected,
+                            paid: paid,
+                            total: all.length,
+                          ),
                         ),
                         const SizedBox(height: 10),
                         // Status stat tiles (2x2 grid)
-                        _StatusGrid(
-                          pending: pending,
-                          approved: approved,
-                          rejected: rejected,
-                          paid: paid,
+                        AnimatedEntrance(
+                          animationType: AnimationType.chatGPTFade,
+                          delay: 180.ms,
+                          duration: 700.ms,
+                          child: _StatusGrid(
+                            pending: pending,
+                            approved: approved,
+                            rejected: rejected,
+                            paid: paid,
+                          ),
                         ),
                         const SizedBox(height: 10),
                         // Volume bar chart (by type)
-                        _VolumeByTypeChart(transactions: all),
+                        AnimatedEntrance(
+                          animationType: AnimationType.chatGPTFade,
+                          delay: 260.ms,
+                          duration: 700.ms,
+                          child: _VolumeByTypeChart(transactions: all),
+                        ),
                         const SizedBox(height: 10),
                         // Recent activity sparkline
-                        _ActivitySparkline(transactions: all),
+                        AnimatedEntrance(
+                          animationType: AnimationType.chatGPTFade,
+                          delay: 340.ms,
+                          duration: 700.ms,
+                          child: _ActivitySparkline(transactions: all),
+                        ),
                         const SizedBox(height: 10),
                         // Type breakdown list
-                        _TypeBreakdownList(transactions: all),
+                        AnimatedEntrance(
+                          animationType: AnimationType.chatGPTFade,
+                          delay: 420.ms,
+                          duration: 700.ms,
+                          child: _TypeBreakdownList(transactions: all),
+                        ),
                       ],
                     ),
                   ),
@@ -255,12 +288,22 @@ class _DesktopLayout extends StatelessWidget {
         Expanded(
           child: Column(
             children: [
-              _FilterBar(ctrl: ctrl),
+              AnimatedEntrance(
+                animationType: AnimationType.chatGPTFade,
+                delay: 200.ms,
+                duration: 700.ms,
+                child: _FilterBar(ctrl: ctrl),
+              ),
               const Divider(height: 1, color: _border),
               Expanded(
                 child: filtered.isEmpty
                     ? const _EmptyView()
-                    : _DesktopTable(transactions: filtered, ctrl: ctrl),
+                    : AnimatedEntrance(
+                        animationType: AnimationType.chatGPTFade,
+                        delay: 280.ms,
+                        duration: 700.ms,
+                        child: _DesktopTable(transactions: filtered, ctrl: ctrl),
+                      ),
               ),
             ],
           ),
@@ -294,57 +337,72 @@ class _MobileLayout extends StatelessWidget {
     return Column(
       children: [
         // compact header
-        Container(
-          color: _surface,
-          padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
-          child: Row(children: [
-            Expanded(
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                const Text('Transactions',
-                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700,
-                        color: _textPri)),
-                Text('${filtered.length} of ${all.length}',
-                    style: const TextStyle(fontSize: 11, color: _textSec)),
-              ]),
-            ),
-            IconButton(
-              onPressed: ctrl.refresh,
-              icon: const Icon(Icons.refresh_rounded, size: 20, color: _textSec),
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(),
-            ),
-          ]),
-        ),
-        // Horizontal status chips
-        Container(
-          color: _surface,
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
+        AnimatedEntrance(
+          animationType: AnimationType.chatGPTFade,
+          duration: 700.ms,
+          child: Container(
+            color: _surface,
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
             child: Row(children: [
-              _MiniStatusChip('Pending',  pending,  _colPending),
-              const SizedBox(width: 6),
-              _MiniStatusChip('Approved', approved, _colApproved),
-              const SizedBox(width: 6),
-              _MiniStatusChip('Paid',     paid,     _colPaid),
-              const SizedBox(width: 6),
-              _MiniStatusChip('Rejected', rejected, _colRejected),
+              Expanded(
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  const Text('Transactions',
+                      style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700,
+                          color: _textPri)),
+                  Text('${filtered.length} of ${all.length}',
+                      style: const TextStyle(fontSize: 11, color: _textSec)),
+                ]),
+              ),
+              IconButton(
+                onPressed: ctrl.refresh,
+                icon: const Icon(Icons.refresh_rounded, size: 20, color: _textSec),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+              ),
             ]),
           ),
         ),
+        // Horizontal status chips
+        AnimatedEntrance(
+          animationType: AnimationType.chatGPTFade,
+          delay: 100.ms,
+          duration: 700.ms,
+          child: Container(
+            color: _surface,
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(children: [
+                _MiniStatusChip('Pending',  pending,  _colPending),
+                const SizedBox(width: 6),
+                _MiniStatusChip('Approved', approved, _colApproved),
+                const SizedBox(width: 6),
+                _MiniStatusChip('Paid',     paid,     _colPaid),
+                const SizedBox(width: 6),
+                _MiniStatusChip('Rejected', rejected, _colRejected),
+              ]),
+            ),
+          ),
+        ),
         const Divider(height: 1, color: _border),
-        _FilterBar(ctrl: ctrl),
+        AnimatedEntrance(
+          animationType: AnimationType.chatGPTFade,
+          delay: 180.ms,
+          duration: 700.ms,
+          child: _FilterBar(ctrl: ctrl),
+        ),
         const Divider(height: 1, color: _border),
         Expanded(
           child: filtered.isEmpty
               ? const _EmptyView()
-              : ListView.separated(
-            padding: const EdgeInsets.all(12),
-            itemCount: filtered.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 7),
-            itemBuilder: (_, i) =>
-                _MobileCard(tx: filtered[i], ctrl: ctrl),
-          ),
+              : AnimatedListView(
+                  itemCount: filtered.length,
+                  animationType: AnimationType.chatGPTFade,
+                  staggerDelay: 80.ms,
+                  duration: 600.ms,
+                  itemBuilder: (_, i) => _MobileCard(tx: filtered[i], ctrl: ctrl),
+                  padding: const EdgeInsets.all(12),
+                ),
         ),
       ],
     );

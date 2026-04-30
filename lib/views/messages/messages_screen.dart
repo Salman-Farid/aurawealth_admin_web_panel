@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../controllers/message_controller.dart';
 import '../../controllers/admin_chat_controller.dart';
 import '../../core/utils/responsive.dart';
@@ -7,6 +8,7 @@ import '../../core/utils/formatters.dart';
 import '../../widgets/common/loading_widget.dart';
 import '../../widgets/common/error_widget.dart' as custom_error;
 import '../../widgets/common/empty_state_widget.dart';
+import '../../widgets/common/animated_screen_wrapper.dart';
 import '../../models/message.dart';
 import '../../models/message_thread.dart';
 
@@ -58,17 +60,26 @@ class MessagesScreen extends StatelessWidget {
       return Row(
         children: [
           // ── Left sidebar ──────────────────────────────────────────────────
-          Container(
-            width: _kSidebarWidth,
-            color: _sidebarBg,
-            child: _ConversationList(controller: controller),
+          AnimatedEntrance(
+            animationType: AnimationType.fadeSlideLeft,
+            duration: 400.ms,
+            child: Container(
+              width: _kSidebarWidth,
+              color: _sidebarBg,
+              child: _ConversationList(controller: controller),
+            ),
           ),
 
           // ── Right pane ───────────────────────────────────────────────────
           Expanded(
-            child: controller.selectedUserId.value.isEmpty
-                ? _EmptyConversation()
-                : _ConversationPane(controller: controller),
+            child: AnimatedEntrance(
+              animationType: AnimationType.fadeSlideRight,
+              delay: 150.ms,
+              duration: 400.ms,
+              child: controller.selectedUserId.value.isEmpty
+                  ? _EmptyConversation()
+                  : _ConversationPane(controller: controller),
+            ),
           ),
         ],
       );
@@ -163,15 +174,10 @@ class _ThreadListBody extends StatelessWidget {
         );
       }
 
-      return ListView.separated(
+      return AnimatedListView(
         padding: const EdgeInsets.symmetric(vertical: 8),
         itemCount: controller.messageThreads.length,
-        separatorBuilder: (_, __) => Divider(
-          height: 1,
-          indent: 72,
-          endIndent: 16,
-          color: Colors.grey.shade100,
-        ),
+        staggerDelay: 40.ms,
         itemBuilder: (context, index) {
           return _ThreadTile(
             thread: controller.messageThreads[index],
@@ -1262,33 +1268,36 @@ class _EmptyConversation extends StatelessWidget {
     return Container(
       color: _surfaceBg,
       child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: _liveAccent.withValues(alpha: 0.08),
-                shape: BoxShape.circle,
+        child: AnimatedEntrance(
+          animationType: AnimationType.scaleFade,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: _liveAccent.withValues(alpha: 0.08),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.chat_bubble_outline_rounded,
+                    size: 48, color: _liveAccent.withValues(alpha: 0.5)),
               ),
-              child: Icon(Icons.chat_bubble_outline_rounded,
-                  size: 48, color: _liveAccent.withValues(alpha: 0.5)),
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              'Select a conversation',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF6B7280),
+              const SizedBox(height: 20),
+              const Text(
+                'Select a conversation',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF6B7280),
+                ),
               ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              'Choose a thread from the left panel to start',
-              style: TextStyle(fontSize: 13, color: Colors.grey.shade400),
-            ),
-          ],
+              const SizedBox(height: 6),
+              Text(
+                'Choose a thread from the left panel to start',
+                style: TextStyle(fontSize: 13, color: Colors.grey.shade400),
+              ),
+            ],
+          ),
         ),
       ),
     );

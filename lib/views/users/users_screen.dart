@@ -7,6 +7,7 @@ import '../../core/constants/app_colors.dart';
 import '../../core/utils/formatters.dart';
 import '../../widgets/common/loading_widget.dart';
 import '../../widgets/common/error_widget.dart' as custom_error;
+import '../../widgets/common/animated_screen_wrapper.dart';
 import '../../models/user.dart';
 
 class UsersScreen extends StatefulWidget {
@@ -44,8 +45,8 @@ class _UsersScreenState extends State<UsersScreen> {
           onRefresh: () async => controller.refresh(),
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: AnimatedColumn(
+              staggerDelay: 100.ms,
               children: [
                 _buildHeader(controller),
                 const SizedBox(height: 20),
@@ -59,12 +60,46 @@ class _UsersScreenState extends State<UsersScreen> {
                 _buildLineChart(controller),
 
                 const SizedBox(height: 20),
-                Row(
-                  children: [
-                    Expanded(child: _buildPieChart(activeUsers, totalUsers)),
-                    const SizedBox(width: 12),
-                    Expanded(child: _buildBarChart(controller)),
-                  ],
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final isNarrow = constraints.maxWidth < 500;
+                    if (isNarrow) {
+                      return Column(
+                        children: [
+                          AnimatedEntrance(
+                            animationType: AnimationType.scaleFade,
+                            delay: 300.ms,
+                            child: _buildPieChart(activeUsers, totalUsers),
+                          ),
+                          const SizedBox(height: 12),
+                          AnimatedEntrance(
+                            animationType: AnimationType.scaleFade,
+                            delay: 400.ms,
+                            child: _buildBarChart(controller),
+                          ),
+                        ],
+                      );
+                    }
+                    return Row(
+                      children: [
+                        Expanded(
+                          child: AnimatedEntrance(
+                            animationType: AnimationType.fadeSlideLeft,
+                            delay: 300.ms,
+                            child: _buildPieChart(activeUsers, totalUsers),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: AnimatedEntrance(
+                            animationType: AnimationType.fadeSlideRight,
+                            delay: 400.ms,
+                            child: _buildBarChart(controller),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
                 ),
 
                 const SizedBox(height: 28),
@@ -299,11 +334,11 @@ class _UsersScreenState extends State<UsersScreen> {
           ],
         ),
         const SizedBox(height: 12),
-        ListView.separated(
+        AnimatedListView(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           itemCount: controller.filteredUsers.length.clamp(0, 5),
-          separatorBuilder: (_, __) => const SizedBox(height: 10),
+          staggerDelay: 60.ms,
           itemBuilder: (context, index) {
             final user = controller.filteredUsers[index];
             final userTxs = controller.getUserTransactions(user.id);
@@ -311,6 +346,7 @@ class _UsersScreenState extends State<UsersScreen> {
             
             return Container(
               padding: const EdgeInsets.all(14),
+              margin: const EdgeInsets.only(bottom: 10),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),

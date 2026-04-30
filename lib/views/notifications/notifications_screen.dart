@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../controllers/notification_controller.dart';
 import '../../controllers/user_controller.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/utils/responsive.dart';
 import '../../widgets/common/loading_widget.dart';
 import '../../widgets/common/error_widget.dart' as custom_error;
+import '../../widgets/common/animated_screen_wrapper.dart';
 import 'widgets/notification_header_widget.dart';
 import 'widgets/notification_tab_bar_widget.dart';
 import 'widgets/targeted_notification_card.dart';
@@ -77,15 +79,26 @@ class _NotificationsScreenState extends State<NotificationsScreen>
   Widget _buildSendNotificationTab() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
-      child: Column(
+      child: AnimatedColumn(
+        staggerDelay: 120.ms,
         children: [
           if (Responsive.isDesktop(context))
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                Expanded(child: TargetedNotificationCard()),
-                SizedBox(width: 20),
-                Expanded(child: BroadcastNotificationCard()),
+              children: [
+                Expanded(
+                  child: const TargetedNotificationCard()
+                      .animate()
+                      .fadeIn(delay: 100.ms, duration: 500.ms)
+                      .slideX(begin: -0.1, end: 0, duration: 500.ms),
+                ),
+                const SizedBox(width: 20),
+                Expanded(
+                  child: const BroadcastNotificationCard()
+                      .animate()
+                      .fadeIn(delay: 200.ms, duration: 500.ms)
+                      .slideX(begin: 0.1, end: 0, duration: 500.ms),
+                ),
               ],
             )
           else
@@ -135,10 +148,10 @@ class _NotificationsScreenState extends State<NotificationsScreen>
   }
 
   Widget _buildDeviceList(List devices) {
-    return ListView.separated(
+    return AnimatedListView(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       itemCount: devices.length,
-      separatorBuilder: (context, index) => const SizedBox(height: 12),
+      staggerDelay: 50.ms,
       itemBuilder: (context, index) {
         final device = devices[index];
         return DeviceCardWidget(
@@ -171,7 +184,8 @@ class _NotificationsScreenState extends State<NotificationsScreen>
           return const LoadingWidget(message: 'Loading statistics...');
         }
 
-        return Column(
+        return AnimatedColumn(
+          staggerDelay: 120.ms,
           children: [
             StatisticsGridWidget(stats: stats),
             const SizedBox(height: 24),

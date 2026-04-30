@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:lottie/lottie.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../controllers/dashboard_controller.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/utils/formatters.dart';
+import '../../core/utils/responsive.dart';
 import '../../models/transaction.dart';
 import '../../widgets/common/loading_widget.dart';
 import '../../widgets/common/error_widget.dart' as custom_error;
+import '../../widgets/common/animated_screen_wrapper.dart';
 
 class ModernDashboardScreen extends StatelessWidget {
   const ModernDashboardScreen({Key? key}) : super(key: key);
@@ -43,27 +46,58 @@ class ModernDashboardScreen extends StatelessWidget {
               _buildQuickStatsGrid(controller),
               const SizedBox(height: 32),
 
-              // Charts Row
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Transaction Types Chart
-                  Expanded(
-                    flex: 2,
-                    child: _buildTransactionTypesChart(controller),
-                  ),
-                  const SizedBox(width: 24),
-
-                  // Status Distribution
-                  Expanded(
-                    child: _buildStatusDistribution(controller),
-                  ),
-                ],
+              // Charts Row - Responsive
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final isNarrow = constraints.maxWidth < 700;
+                  if (isNarrow) {
+                    return Column(
+                      children: [
+                        AnimatedEntrance(
+                          animationType: AnimationType.fadeSlideUp,
+                          delay: 200.ms,
+                          child: _buildTransactionTypesChart(controller),
+                        ),
+                        const SizedBox(height: 16),
+                        AnimatedEntrance(
+                          animationType: AnimationType.fadeSlideUp,
+                          delay: 300.ms,
+                          child: _buildStatusDistribution(controller),
+                        ),
+                      ],
+                    );
+                  }
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        flex: 2,
+                        child: AnimatedEntrance(
+                          animationType: AnimationType.fadeSlideLeft,
+                          delay: 200.ms,
+                          child: _buildTransactionTypesChart(controller),
+                        ),
+                      ),
+                      const SizedBox(width: 24),
+                      Expanded(
+                        child: AnimatedEntrance(
+                          animationType: AnimationType.fadeSlideRight,
+                          delay: 300.ms,
+                          child: _buildStatusDistribution(controller),
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
               const SizedBox(height: 32),
 
               // Recent Transactions
-              _buildModernTransactionsTable(controller),
+              AnimatedEntrance(
+                animationType: AnimationType.fadeSlideUp,
+                delay: 400.ms,
+                child: _buildModernTransactionsTable(controller),
+              ),
             ],
           ),
         ),
@@ -77,63 +111,115 @@ class ModernDashboardScreen extends StatelessWidget {
     if (hour >= 12 && hour < 17) greeting = 'Good Afternoon';
     if (hour >= 17) greeting = 'Good Evening';
 
-    return Container(
-      padding: const EdgeInsets.fromLTRB(20, 10, 140,10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  greeting,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  'AuraWealth Admin',
-                  style: TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                    letterSpacing: -0.5,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'Manage your gold transactions with ease',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.black.withOpacity(0.9),
-                  ),
+    return AnimatedEntrance(
+      animationType: AnimationType.fadeSlideUp,
+      duration: 600.ms,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final isSmall = constraints.maxWidth < 500;
+          return Container(
+            padding: EdgeInsets.fromLTRB(20, 10, isSmall ? 20 : 140, 10),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.04),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
                 ),
               ],
             ),
-          ),
-          SizedBox(
-            width: 150,
-            height: 160,
-            child: Lottie.asset(
-              'assets/lottie/Admin Panel.json',
-              fit: BoxFit.fitHeight,
-            ),
-          ),
-        ],
+            child: isSmall
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        greeting,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      const Text(
+                        'AuraWealth Admin',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Manage your gold transactions with ease',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.black.withOpacity(0.9),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Center(
+                        child: SizedBox(
+                          width: 120,
+                          height: 120,
+                          child: Lottie.asset(
+                            'assets/lottie/Admin Panel.json',
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+                : Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              greeting,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.black,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            const Text(
+                              'AuraWealth Admin',
+                              style: TextStyle(
+                                fontSize: 32,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                                letterSpacing: -0.5,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              'Manage your gold transactions with ease',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.black.withOpacity(0.9),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(
+                        width: 150,
+                        height: 160,
+                        child: Lottie.asset(
+                          'assets/lottie/Admin Panel.json',
+                          fit: BoxFit.fitHeight,
+                        ),
+                      ),
+                    ],
+                  ),
+          );
+        },
       ),
     );
   }
@@ -141,56 +227,84 @@ class ModernDashboardScreen extends StatelessWidget {
   Widget _buildQuickStatsGrid(DashboardController controller) {
     return LayoutBuilder(
       builder: (context, constraints) {
+        final width = constraints.maxWidth;
+        int crossCount;
+        double aspectRatio;
+        if (width < 400) {
+          crossCount = 1;
+          aspectRatio = 3.0;
+        } else if (width < 600) {
+          crossCount = 2;
+          aspectRatio = 2.0;
+        } else if (width < 900) {
+          crossCount = 2;
+          aspectRatio = 2.5;
+        } else {
+          crossCount = 4;
+          aspectRatio = 2.2;
+        }
+
+        final cards = [
+          _buildStatCard(
+            title: 'Total Transactions',
+            value: controller.totalTransactions.value.toString(),
+            icon: Icons.receipt_long_rounded,
+            gradient: const LinearGradient(
+              colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+            ),
+            trend: '+12.5%',
+          ),
+          _buildStatCard(
+            title: 'Pending Actions',
+            value: controller.totalPendingTransactions.value.toString(),
+            icon: Icons.pending_actions_rounded,
+            gradient: const LinearGradient(
+              colors: [Color(0xFFf093fb), Color(0xFFf5576c)],
+            ),
+            trend: '-3.2%',
+            isTrendDown: true,
+          ),
+          _buildStatCard(
+            title: 'Gold Holdings',
+            value: Formatters.formatGrams(controller.totalGoldHoldings.value),
+            icon: Icons.diamond_rounded,
+            gradient: const LinearGradient(
+              colors: [Color(0xFFFFD700), Color(0xFFFFA500)],
+            ),
+            trend: '+8.7%',
+          ),
+          _buildStatCard(
+            title: 'Total Revenue',
+            value: Formatters.formatCurrency(controller.totalRevenue.value),
+            icon: Icons.monetization_on_rounded,
+            gradient: const LinearGradient(
+              colors: [Color(0xFF4facfe), Color(0xFF00f2fe)],
+            ),
+            trend: '+15.3%',
+          ),
+        ];
+
         return Align(
           alignment: Alignment.topLeft,
           child: SizedBox(
-            width: constraints.maxWidth,
+            width: width,
             child: GridView.count(
-              crossAxisCount: 4,
+              crossAxisCount: crossCount,
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              childAspectRatio: 2.2,
+              childAspectRatio: aspectRatio,
               mainAxisSpacing: 12,
               crossAxisSpacing: 12,
-              children: [
-                _buildStatCard(
-                  title: 'Total Transactions',
-                  value: controller.totalTransactions.value.toString(),
-                  icon: Icons.receipt_long_rounded,
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF667eea), Color(0xFF764ba2)],
-                  ),
-                  trend: '+12.5%',
-                ),
-                _buildStatCard(
-                  title: 'Pending Actions',
-                  value: controller.totalPendingTransactions.value.toString(),
-                  icon: Icons.pending_actions_rounded,
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFFf093fb), Color(0xFFf5576c)],
-                  ),
-                  trend: '-3.2%',
-                  isTrendDown: true,
-                ),
-                _buildStatCard(
-                  title: 'Gold Holdings',
-                  value: Formatters.formatGrams(controller.totalGoldHoldings.value),
-                  icon: Icons.diamond_rounded,
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFFFFD700), Color(0xFFFFA500)],
-                  ),
-                  trend: '+8.7%',
-                ),
-                _buildStatCard(
-                  title: 'Total Revenue',
-                  value: Formatters.formatCurrency(controller.totalRevenue.value),
-                  icon: Icons.monetization_on_rounded,
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF4facfe), Color(0xFF00f2fe)],
-                  ),
-                  trend: '+15.3%',
-                ),
-              ],
+              children: cards.asMap().entries.map((entry) {
+                final index = entry.key;
+                final card = entry.value;
+                return AnimatedEntrance(
+                  animationType: AnimationType.scaleFade,
+                  delay: Duration(milliseconds: 100 * index),
+                  duration: 500.ms,
+                  child: card,
+                );
+              }).toList(),
             ),
           ),
         );
@@ -219,87 +333,97 @@ class ModernDashboardScreen extends StatelessWidget {
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final isSmall = constraints.maxWidth < 180;
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  gradient: gradient,
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: gradient.colors.first.withOpacity(0.3),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Icon(icon, color: Colors.white, size: 16),
-              ),
-              if (trend != null)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: isTrendDown
-                        ? const Color(0xFFFFEBEE)
-                        : const Color(0xFFE8F5E9),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        isTrendDown ? Icons.trending_down : Icons.trending_up,
-                        size: 14,
-                        color: isTrendDown
-                            ? const Color(0xFFE53935)
-                            : const Color(0xFF43A047),
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        trend,
-                        style: TextStyle(
-                          fontSize: 8,
-                          fontWeight: FontWeight.bold,
-                          color: isTrendDown
-                              ? const Color(0xFFE53935)
-                              : const Color(0xFF43A047),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(isSmall ? 8 : 12),
+                    decoration: BoxDecoration(
+                      gradient: gradient,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: gradient.colors.first.withOpacity(0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
+                    child: Icon(icon, color: Colors.white, size: isSmall ? 14 : 16),
                   ),
-                ),
-            ],
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                value,
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF2C3437),
-                  letterSpacing: -0.5,
-                ),
+                  if (trend != null && !isSmall)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: isTrendDown
+                            ? const Color(0xFFFFEBEE)
+                            : const Color(0xFFE8F5E9),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            isTrendDown ? Icons.trending_down : Icons.trending_up,
+                            size: 14,
+                            color: isTrendDown
+                                ? const Color(0xFFE53935)
+                                : const Color(0xFF43A047),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            trend,
+                            style: TextStyle(
+                              fontSize: 8,
+                              fontWeight: FontWeight.bold,
+                              color: isTrendDown
+                                  ? const Color(0xFFE53935)
+                                  : const Color(0xFF43A047),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
               ),
-              const SizedBox(height: 4),
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.grey.shade600,
-                ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      value,
+                      style: TextStyle(
+                        fontSize: isSmall ? 16 : 20,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF2C3437),
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: isSmall ? 10 : 12,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.grey.shade600,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ),
             ],
-          ),
-        ],
+          );
+        },
       ),
     );
   }

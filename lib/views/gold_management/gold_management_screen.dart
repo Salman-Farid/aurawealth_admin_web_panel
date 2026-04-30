@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../controllers/gold_controller.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_constants.dart';
@@ -13,6 +14,7 @@ import '../../widgets/common/modern_card.dart';
 import '../../widgets/common/chart_card.dart';
 import '../../widgets/common/info_box.dart';
 import '../../widgets/common/chart_helpers.dart';
+import '../../widgets/common/animated_screen_wrapper.dart';
 
 class GoldManagementScreen extends StatelessWidget {
   const GoldManagementScreen({Key? key}) : super(key: key);
@@ -37,8 +39,8 @@ class GoldManagementScreen extends StatelessWidget {
 
       return SingleChildScrollView(
         padding: EdgeInsets.all(compactPadding),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: AnimatedColumn(
+          staggerDelay: 100.ms,
           children: [
             // Header
             Row(
