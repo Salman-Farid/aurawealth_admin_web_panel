@@ -149,29 +149,25 @@ class TransactionsScreen extends StatelessWidget {
         final rejected = all.where((t) => t.status.toLowerCase() == 'rejected').length;
         final paid     = all.where((t) => t.status.toLowerCase() == 'paid').length;
 
-        return AnimatedEntrance(
-          animationType: AnimationType.chatGPTFade,
-          duration: 700.ms,
-          child: Responsive.isMobile(context)
-              ? _MobileLayout(
-                  all: all,
-                  filtered: filtered,
-                  pending: pending,
-                  approved: approved,
-                  rejected: rejected,
-                  paid: paid,
-                  ctrl: ctrl,
-                )
-              : _DesktopLayout(
-                  all: all,
-                  filtered: filtered,
-                  pending: pending,
-                  approved: approved,
-                  rejected: rejected,
-                  paid: paid,
-                  ctrl: ctrl,
-                ),
-        );
+        return Responsive.isMobile(context)
+            ? _MobileLayout(
+                all: all,
+                filtered: filtered,
+                pending: pending,
+                approved: approved,
+                rejected: rejected,
+                paid: paid,
+                ctrl: ctrl,
+              )
+            : _DesktopLayout(
+                all: all,
+                filtered: filtered,
+                pending: pending,
+                approved: approved,
+                rejected: rejected,
+                paid: paid,
+                ctrl: ctrl,
+              );
       }),
     );
   }
@@ -209,70 +205,61 @@ class _DesktopLayout extends StatelessWidget {
             child: Column(
               children: [
                 // Header
-                AnimatedEntrance(
-                  animationType: AnimationType.chatGPTFade,
-                  duration: 700.ms,
-                  child: _PanelHeader(
-                    title: 'Transactions',
-                    subtitle: '${all.length} total · ${filtered.length} shown',
-                    onRefresh: ctrl.refresh,
-                  ),
-                ),
+                _PanelHeader(
+                  title: 'Transactions',
+                  subtitle: '${all.length} total · ${filtered.length} shown',
+                  onRefresh: ctrl.refresh,
+                ).animate()
+                  .fadeIn(duration: 900.ms, curve: Curves.easeInOutCubicEmphasized)
+                  .slideY(begin: 0.06, end: 0, duration: 900.ms, curve: Curves.easeInOutCubicEmphasized),
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
                     child: Column(
                       children: [
                         // Status donut chart
-                        AnimatedEntrance(
-                          animationType: AnimationType.chatGPTFade,
-                          delay: 100.ms,
-                          duration: 700.ms,
-                          child: _DonutCard(
-                            pending: pending,
-                            approved: approved,
-                            rejected: rejected,
-                            paid: paid,
-                            total: all.length,
-                          ),
-                        ),
+                        _DonutCard(
+                          pending: pending,
+                          approved: approved,
+                          rejected: rejected,
+                          paid: paid,
+                          total: all.length,
+                        ).animate()
+                          .fadeIn(delay: 150.ms, duration: 900.ms, curve: Curves.easeInOutCubicEmphasized)
+                          .slideY(delay: 150.ms, begin: 0.06, end: 0, duration: 900.ms, curve: Curves.easeInOutCubicEmphasized)
+                          .scaleXY(delay: 150.ms, begin: 0.97, end: 1.0, duration: 900.ms, curve: Curves.easeInOutCubicEmphasized),
                         const SizedBox(height: 10),
                         // Status stat tiles (2x2 grid)
-                        AnimatedEntrance(
-                          animationType: AnimationType.chatGPTFade,
-                          delay: 180.ms,
-                          duration: 700.ms,
-                          child: _StatusGrid(
-                            pending: pending,
-                            approved: approved,
-                            rejected: rejected,
-                            paid: paid,
-                          ),
-                        ),
+                        _StatusGrid(
+                          pending: pending,
+                          approved: approved,
+                          rejected: rejected,
+                          paid: paid,
+                        ).animate()
+                          .fadeIn(delay: 250.ms, duration: 900.ms, curve: Curves.easeInOutCubicEmphasized)
+                          .slideY(delay: 250.ms, begin: 0.06, end: 0, duration: 900.ms, curve: Curves.easeInOutCubicEmphasized)
+                          .scaleXY(delay: 250.ms, begin: 0.97, end: 1.0, duration: 900.ms, curve: Curves.easeInOutCubicEmphasized),
                         const SizedBox(height: 10),
                         // Volume bar chart (by type)
-                        AnimatedEntrance(
-                          animationType: AnimationType.chatGPTFade,
-                          delay: 260.ms,
-                          duration: 700.ms,
-                          child: _VolumeByTypeChart(transactions: all),
-                        ),
+                        _VolumeByTypeChart(transactions: all)
+                          .animate()
+                          .fadeIn(delay: 350.ms, duration: 900.ms, curve: Curves.easeInOutCubicEmphasized)
+                          .slideY(delay: 350.ms, begin: 0.06, end: 0, duration: 900.ms, curve: Curves.easeInOutCubicEmphasized)
+                          .scaleXY(delay: 350.ms, begin: 0.97, end: 1.0, duration: 900.ms, curve: Curves.easeInOutCubicEmphasized),
                         const SizedBox(height: 10),
                         // Recent activity sparkline
-                        AnimatedEntrance(
-                          animationType: AnimationType.chatGPTFade,
-                          delay: 340.ms,
-                          duration: 700.ms,
-                          child: _ActivitySparkline(transactions: all),
-                        ),
+                        _ActivitySparkline(transactions: all)
+                          .animate()
+                          .fadeIn(delay: 450.ms, duration: 900.ms, curve: Curves.easeInOutCubicEmphasized)
+                          .slideY(delay: 450.ms, begin: 0.06, end: 0, duration: 900.ms, curve: Curves.easeInOutCubicEmphasized)
+                          .scaleXY(delay: 450.ms, begin: 0.97, end: 1.0, duration: 900.ms, curve: Curves.easeInOutCubicEmphasized),
                         const SizedBox(height: 10),
                         // Type breakdown list
-                        AnimatedEntrance(
-                          animationType: AnimationType.chatGPTFade,
-                          delay: 420.ms,
-                          duration: 700.ms,
-                          child: _TypeBreakdownList(transactions: all),
-                        ),
+                        _TypeBreakdownList(transactions: all)
+                          .animate()
+                          .fadeIn(delay: 550.ms, duration: 900.ms, curve: Curves.easeInOutCubicEmphasized)
+                          .slideY(delay: 550.ms, begin: 0.06, end: 0, duration: 900.ms, curve: Curves.easeInOutCubicEmphasized)
+                          .scaleXY(delay: 550.ms, begin: 0.97, end: 1.0, duration: 900.ms, curve: Curves.easeInOutCubicEmphasized),
                       ],
                     ),
                   ),
@@ -288,22 +275,20 @@ class _DesktopLayout extends StatelessWidget {
         Expanded(
           child: Column(
             children: [
-              AnimatedEntrance(
-                animationType: AnimationType.chatGPTFade,
-                delay: 200.ms,
-                duration: 700.ms,
-                child: _FilterBar(ctrl: ctrl),
-              ),
+              _FilterBar(ctrl: ctrl)
+                .animate()
+                .fadeIn(delay: 300.ms, duration: 900.ms, curve: Curves.easeInOutCubicEmphasized)
+                .slideY(delay: 300.ms, begin: 0.06, end: 0, duration: 900.ms, curve: Curves.easeInOutCubicEmphasized)
+                .scaleXY(delay: 300.ms, begin: 0.97, end: 1.0, duration: 900.ms, curve: Curves.easeInOutCubicEmphasized),
               const Divider(height: 1, color: _border),
               Expanded(
                 child: filtered.isEmpty
                     ? const _EmptyView()
-                    : AnimatedEntrance(
-                        animationType: AnimationType.chatGPTFade,
-                        delay: 280.ms,
-                        duration: 700.ms,
-                        child: _DesktopTable(transactions: filtered, ctrl: ctrl),
-                      ),
+                    : _DesktopTable(transactions: filtered, ctrl: ctrl)
+                        .animate()
+                        .fadeIn(delay: 400.ms, duration: 900.ms, curve: Curves.easeInOutCubicEmphasized)
+                        .slideY(delay: 400.ms, begin: 0.06, end: 0, duration: 900.ms, curve: Curves.easeInOutCubicEmphasized)
+                        .scaleXY(delay: 400.ms, begin: 0.97, end: 1.0, duration: 900.ms, curve: Curves.easeInOutCubicEmphasized),
               ),
             ],
           ),
@@ -337,71 +322,67 @@ class _MobileLayout extends StatelessWidget {
     return Column(
       children: [
         // compact header
-        AnimatedEntrance(
-          animationType: AnimationType.chatGPTFade,
-          duration: 700.ms,
-          child: Container(
-            color: _surface,
-            padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
-            child: Row(children: [
-              Expanded(
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  const Text('Transactions',
-                      style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700,
-                          color: _textPri)),
-                  Text('${filtered.length} of ${all.length}',
-                      style: const TextStyle(fontSize: 11, color: _textSec)),
-                ]),
-              ),
-              IconButton(
-                onPressed: ctrl.refresh,
-                icon: const Icon(Icons.refresh_rounded, size: 20, color: _textSec),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-              ),
-            ]),
-          ),
-        ),
-        // Horizontal status chips
-        AnimatedEntrance(
-          animationType: AnimationType.chatGPTFade,
-          delay: 100.ms,
-          duration: 700.ms,
-          child: Container(
-            color: _surface,
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(children: [
-                _MiniStatusChip('Pending',  pending,  _colPending),
-                const SizedBox(width: 6),
-                _MiniStatusChip('Approved', approved, _colApproved),
-                const SizedBox(width: 6),
-                _MiniStatusChip('Paid',     paid,     _colPaid),
-                const SizedBox(width: 6),
-                _MiniStatusChip('Rejected', rejected, _colRejected),
+        Container(
+          color: _surface,
+          padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
+          child: Row(children: [
+            Expanded(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                const Text('Transactions',
+                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700,
+                        color: _textPri)),
+                Text('${filtered.length} of ${all.length}',
+                    style: const TextStyle(fontSize: 11, color: _textSec)),
               ]),
             ),
+            IconButton(
+              onPressed: ctrl.refresh,
+              icon: const Icon(Icons.refresh_rounded, size: 20, color: _textSec),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+            ),
+          ]),
+        ).animate()
+          .fadeIn(duration: 900.ms, curve: Curves.easeInOutCubicEmphasized)
+          .slideY(begin: 0.06, end: 0, duration: 900.ms, curve: Curves.easeInOutCubicEmphasized),
+        // Horizontal status chips
+        Container(
+          color: _surface,
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(children: [
+              _MiniStatusChip('Pending',  pending,  _colPending),
+              const SizedBox(width: 6),
+              _MiniStatusChip('Approved', approved, _colApproved),
+              const SizedBox(width: 6),
+              _MiniStatusChip('Paid',     paid,     _colPaid),
+              const SizedBox(width: 6),
+              _MiniStatusChip('Rejected', rejected, _colRejected),
+            ]),
           ),
-        ),
+        ).animate()
+          .fadeIn(delay: 120.ms, duration: 900.ms, curve: Curves.easeInOutCubicEmphasized)
+          .slideY(delay: 120.ms, begin: 0.06, end: 0, duration: 900.ms, curve: Curves.easeInOutCubicEmphasized)
+          .scaleXY(delay: 120.ms, begin: 0.97, end: 1.0, duration: 900.ms, curve: Curves.easeInOutCubicEmphasized),
         const Divider(height: 1, color: _border),
-        AnimatedEntrance(
-          animationType: AnimationType.chatGPTFade,
-          delay: 180.ms,
-          duration: 700.ms,
-          child: _FilterBar(ctrl: ctrl),
-        ),
+        _FilterBar(ctrl: ctrl)
+          .animate()
+          .fadeIn(delay: 220.ms, duration: 900.ms, curve: Curves.easeInOutCubicEmphasized)
+          .slideY(delay: 220.ms, begin: 0.06, end: 0, duration: 900.ms, curve: Curves.easeInOutCubicEmphasized)
+          .scaleXY(delay: 220.ms, begin: 0.97, end: 1.0, duration: 900.ms, curve: Curves.easeInOutCubicEmphasized),
         const Divider(height: 1, color: _border),
         Expanded(
           child: filtered.isEmpty
               ? const _EmptyView()
-              : AnimatedListView(
+              : ListView.builder(
                   itemCount: filtered.length,
-                  animationType: AnimationType.chatGPTFade,
-                  staggerDelay: 80.ms,
-                  duration: 600.ms,
-                  itemBuilder: (_, i) => _MobileCard(tx: filtered[i], ctrl: ctrl),
                   padding: const EdgeInsets.all(12),
+                  itemBuilder: (_, i) => _MobileCard(tx: filtered[i], ctrl: ctrl)
+                    .animate()
+                    .fadeIn(delay: (300 + i * 80).ms, duration: 800.ms, curve: Curves.easeInOutCubicEmphasized)
+                    .slideY(delay: (300 + i * 80).ms, begin: 0.06, end: 0, duration: 800.ms, curve: Curves.easeInOutCubicEmphasized)
+                    .scaleXY(delay: (300 + i * 80).ms, begin: 0.97, end: 1.0, duration: 800.ms, curve: Curves.easeInOutCubicEmphasized),
                 ),
         ),
       ],
