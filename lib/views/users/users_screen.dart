@@ -8,6 +8,7 @@ import '../../core/utils/formatters.dart';
 import '../../widgets/common/loading_widget.dart';
 import '../../widgets/common/error_widget.dart' as custom_error;
 import '../../widgets/common/animated_screen_wrapper.dart';
+import '../../widgets/common/user_avatar_image.dart';
 import '../../models/user.dart';
 
 class UsersScreen extends StatefulWidget {
@@ -39,7 +40,9 @@ class _UsersScreenState extends State<UsersScreen> {
             .where((u) => controller.getUserTransactions(u.id).isNotEmpty)
             .length;
         final totalTransactions = controller.users.fold<int>(
-            0, (sum, u) => sum + controller.getUserTransactions(u.id).length);
+          0,
+          (sum, u) => sum + controller.getUserTransactions(u.id).length,
+        );
 
         return RefreshIndicator(
           onRefresh: () async => controller.refresh(),
@@ -153,9 +156,18 @@ class _UsersScreenState extends State<UsersScreen> {
             decoration: BoxDecoration(
               color: Colors.white,
               shape: BoxShape.circle,
-              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                ),
+              ],
             ),
-            child: Icon(Icons.refresh_rounded, color: AppColors.primary, size: 22),
+            child: Icon(
+              Icons.refresh_rounded,
+              color: AppColors.primary,
+              size: 22,
+            ),
           ),
         ),
       ],
@@ -166,13 +178,41 @@ class _UsersScreenState extends State<UsersScreen> {
   Widget _buildStatCards(int total, int active, int txn) {
     return Row(
       children: [
-        Expanded(child: _statCard('Total Users', total.toString(), Icons.group_rounded, const Color(0xFF2196F3))),
+        Expanded(
+          child: _statCard(
+            'Total Users',
+            total.toString(),
+            Icons.group_rounded,
+            const Color(0xFF2196F3),
+          ),
+        ),
         const SizedBox(width: 10),
-        Expanded(child: _statCard('Active Now', active.toString(), Icons.bolt_rounded, const Color(0xFF4CAF50))),
+        Expanded(
+          child: _statCard(
+            'Active Now',
+            active.toString(),
+            Icons.bolt_rounded,
+            const Color(0xFF4CAF50),
+          ),
+        ),
         const SizedBox(width: 10),
-        Expanded(child: _statCard('Transactions', txn.toString(), Icons.receipt_rounded, const Color(0xFF673AB7))),
+        Expanded(
+          child: _statCard(
+            'Transactions',
+            txn.toString(),
+            Icons.receipt_rounded,
+            const Color(0xFF673AB7),
+          ),
+        ),
         const SizedBox(width: 10),
-        Expanded(child: _statCard('Growth', '+12.5%', Icons.show_chart_rounded, const Color(0xFFFF9800))),
+        Expanded(
+          child: _statCard(
+            'Growth',
+            '+12.5%',
+            Icons.show_chart_rounded,
+            const Color(0xFFFF9800),
+          ),
+        ),
       ],
     );
   }
@@ -194,7 +234,9 @@ class _UsersScreenState extends State<UsersScreen> {
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(icon, size: 16, color: color)
-                .animate(onPlay: (controller) => controller.repeat(reverse: true))
+                .animate(
+                  onPlay: (controller) => controller.repeat(reverse: true),
+                )
                 .scaleXY(duration: 1200.ms, begin: 1.0, end: 1.1)
                 .then()
                 .scaleXY(duration: 1200.ms, begin: 1.1, end: 1.0),
@@ -239,7 +281,9 @@ class _UsersScreenState extends State<UsersScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(18),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 15)],
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 15),
+        ],
       ),
       child: LineChart(
         LineChartData(
@@ -247,7 +291,8 @@ class _UsersScreenState extends State<UsersScreen> {
             show: true,
             drawVerticalLine: false,
             horizontalInterval: 2,
-            getDrawingHorizontalLine: (v) => FlLine(color: Colors.grey.withOpacity(0.05), strokeWidth: 1),
+            getDrawingHorizontalLine: (v) =>
+                FlLine(color: Colors.grey.withOpacity(0.05), strokeWidth: 1),
           ),
           titlesData: FlTitlesData(
             rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
@@ -256,8 +301,19 @@ class _UsersScreenState extends State<UsersScreen> {
               sideTitles: SideTitles(
                 showTitles: true,
                 getTitlesWidget: (v, m) {
-                  const days = ['1 Mar', '2 Mar', '3 Mar', '4 Mar', '5 Mar', '6 Mar', '7 Mar'];
-                  return Text(days[v.toInt() % 7], style: const TextStyle(color: Colors.grey, fontSize: 9));
+                  const days = [
+                    '1 Mar',
+                    '2 Mar',
+                    '3 Mar',
+                    '4 Mar',
+                    '5 Mar',
+                    '6 Mar',
+                    '7 Mar',
+                  ];
+                  return Text(
+                    days[v.toInt() % 7],
+                    style: const TextStyle(color: Colors.grey, fontSize: 9),
+                  );
                 },
               ),
             ),
@@ -265,12 +321,30 @@ class _UsersScreenState extends State<UsersScreen> {
           borderData: FlBorderData(show: false),
           lineBarsData: [
             LineChartBarData(
-              spots: const [FlSpot(0, 2), FlSpot(1, 1.5), FlSpot(2, 4), FlSpot(3, 3), FlSpot(4, 5), FlSpot(5, 4), FlSpot(6, 6)],
+              spots: const [
+                FlSpot(0, 2),
+                FlSpot(1, 1.5),
+                FlSpot(2, 4),
+                FlSpot(3, 3),
+                FlSpot(4, 5),
+                FlSpot(5, 4),
+                FlSpot(6, 6),
+              ],
               isCurved: true,
-              gradient: const LinearGradient(colors: [Color(0xFF2196F3), Color(0xFF00BCD4)]),
+              gradient: const LinearGradient(
+                colors: [Color(0xFF2196F3), Color(0xFF00BCD4)],
+              ),
               barWidth: 3,
               dotData: FlDotData(show: true),
-              belowBarData: BarAreaData(show: true, gradient: LinearGradient(colors: [const Color(0xFF2196F3).withOpacity(0.15), const Color(0xFF2196F3).withOpacity(0)])),
+              belowBarData: BarAreaData(
+                show: true,
+                gradient: LinearGradient(
+                  colors: [
+                    const Color(0xFF2196F3).withOpacity(0.15),
+                    const Color(0xFF2196F3).withOpacity(0),
+                  ],
+                ),
+              ),
             ),
           ],
         ),
@@ -282,12 +356,25 @@ class _UsersScreenState extends State<UsersScreen> {
     return Container(
       height: 160,
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(18)),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+      ),
       child: PieChart(
         PieChartData(
           sections: [
-            PieChartSectionData(color: const Color(0xFF4CAF50), value: active.toDouble(), radius: 35, showTitle: false),
-            PieChartSectionData(color: Colors.grey.shade100, value: (total - active).toDouble(), radius: 30, showTitle: false),
+            PieChartSectionData(
+              color: const Color(0xFF4CAF50),
+              value: active.toDouble(),
+              radius: 35,
+              showTitle: false,
+            ),
+            PieChartSectionData(
+              color: Colors.grey.shade100,
+              value: (total - active).toDouble(),
+              radius: 30,
+              showTitle: false,
+            ),
           ],
           centerSpaceRadius: 25,
         ),
@@ -299,15 +386,48 @@ class _UsersScreenState extends State<UsersScreen> {
     return Container(
       height: 160,
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(18)),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+      ),
       child: BarChart(
         BarChartData(
           alignment: BarChartAlignment.spaceAround,
           maxY: 10,
           barGroups: [
-            BarChartGroupData(x: 0, barRods: [BarChartRodData(toY: 7, color: const Color(0xFF4CAF50), width: 10, borderRadius: BorderRadius.circular(4))]),
-            BarChartGroupData(x: 1, barRods: [BarChartRodData(toY: 4, color: Colors.orange, width: 10, borderRadius: BorderRadius.circular(4))]),
-            BarChartGroupData(x: 2, barRods: [BarChartRodData(toY: 2, color: Colors.red, width: 10, borderRadius: BorderRadius.circular(4))]),
+            BarChartGroupData(
+              x: 0,
+              barRods: [
+                BarChartRodData(
+                  toY: 7,
+                  color: const Color(0xFF4CAF50),
+                  width: 10,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ],
+            ),
+            BarChartGroupData(
+              x: 1,
+              barRods: [
+                BarChartRodData(
+                  toY: 4,
+                  color: Colors.orange,
+                  width: 10,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ],
+            ),
+            BarChartGroupData(
+              x: 2,
+              barRods: [
+                BarChartRodData(
+                  toY: 2,
+                  color: Colors.red,
+                  width: 10,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ],
+            ),
           ],
           titlesData: FlTitlesData(show: false),
           gridData: FlGridData(show: false),
@@ -341,57 +461,7 @@ class _UsersScreenState extends State<UsersScreen> {
           staggerDelay: 60.ms,
           itemBuilder: (context, index) {
             final user = controller.filteredUsers[index];
-            final userTxs = controller.getUserTransactions(user.id);
-            final totalGrams = userTxs.fold<double>(0, (sum, tx) => sum + tx.grams);
-            
-            return Container(
-              padding: const EdgeInsets.all(14),
-              margin: const EdgeInsets.only(bottom: 10),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10)],
-              ),
-              child: Row(
-                children: [
-                   _buildUserAvatar(user, radius: 24),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          user.name ?? user.email ?? 'User',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 2),
-                        if (user.email != null && user.name != null)
-                          Text(
-                            user.email!,
-                            style: TextStyle(
-                              color: AppColors.grey500,
-                              fontSize: 11,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        Text(
-                          '${userTxs.length} transactions • ${Formatters.formatGrams(totalGrams)}',
-                          style: TextStyle(
-                            color: AppColors.grey600,
-                            fontSize: 11,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Icon(Icons.chevron_right_rounded, color: Colors.grey, size: 20),
-                ],
-              ),
-            );
+            return _buildUserDetailCard(user, controller, compact: true);
           },
         ),
       ],
@@ -440,36 +510,16 @@ class _UsersScreenState extends State<UsersScreen> {
               ),
               const SizedBox(height: 16),
               Expanded(
-                child: Obx(() => ListView.separated(
-                  itemCount: controller.filteredUsers.length,
-                  separatorBuilder: (_, __) => const Divider(height: 1),
-                  itemBuilder: (context, index) {
-                    final user = controller.filteredUsers[index];
-                    final userTxs = controller.getUserTransactions(user.id);
-                    final totalGrams = userTxs.fold<double>(0, (sum, tx) => sum + tx.grams);
-                    
-                    return ListTile(
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                       leading: _buildUserAvatar(user, radius: 24),
-                      title: Text(
-                        user.name ?? user.email ?? 'User',
-                        style: const TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (user.email != null && user.name != null)
-                            Text(user.email!, style: TextStyle(fontSize: 11)),
-                          Text(
-                            '${userTxs.length} txs • ${Formatters.formatGrams(totalGrams)} • ID: ${user.id.substring(0, 8)}...',
-                            style: TextStyle(fontSize: 11, color: AppColors.grey600),
-                          ),
-                        ],
-                      ),
-                      trailing: Icon(Icons.chevron_right),
-                    );
-                  },
-                )),
+                child: Obx(
+                  () => ListView.separated(
+                    itemCount: controller.filteredUsers.length,
+                    separatorBuilder: (_, __) => const Divider(height: 1),
+                    itemBuilder: (context, index) {
+                      final user = controller.filteredUsers[index];
+                      return _buildUserDetailCard(user, controller);
+                    },
+                  ),
+                ),
               ),
             ],
           ),
@@ -478,46 +528,183 @@ class _UsersScreenState extends State<UsersScreen> {
     );
   }
 
-  /// Helper widget to display user avatar with proper image loading
-  Widget _buildUserAvatar(User user, {double radius = 24}) {
-    final hasValidPhoto = user.photoUrl != null && 
-                         user.photoUrl!.isNotEmpty && 
-                         !user.photoUrl!.contains('null');
-    
-    return CircleAvatar(
-      radius: radius,
-      backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-      backgroundImage: hasValidPhoto ? NetworkImage(user.photoUrl!) : null,
-      onBackgroundImageError: hasValidPhoto
-          ? (exception, stackTrace) {
-              // Image failed to load, will show initials instead
-            }
-          : null,
-      child: !hasValidPhoto
-          ? Text(
-              _getUserInitials(user),
-              style: TextStyle(
-                color: AppColors.primary,
-                fontWeight: FontWeight.bold,
-                fontSize: radius > 20 ? 16 : 12,
-              ),
-            )
-          : null,
+  Widget _buildUserDetailCard(
+    User user,
+    UserController controller, {
+    bool compact = false,
+  }) {
+    final userTxs = controller.getUserTransactions(user.id);
+    final txGrams = userTxs.fold<double>(0, (sum, tx) => sum + tx.grams);
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      margin: const EdgeInsets.only(bottom: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10),
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildUserAvatar(user, radius: compact ? 24 : 30),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        user.displayName,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    _statusChip(user.isAdmin ? 'Admin' : user.role),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 6,
+                  children: [
+                    _detailChip(Icons.email_outlined, user.email ?? 'No email'),
+                    _detailChip(
+                      Icons.phone_outlined,
+                      user.phoneNumber ?? 'No phone',
+                    ),
+                    _detailChip(
+                      Icons.fingerprint,
+                      'Fingerprint: ${_yesNo(user.hasFingerprint)}',
+                    ),
+                    _detailChip(
+                      Icons.pin_outlined,
+                      'Passcode: ${_yesNo(user.hasPasscode)}',
+                    ),
+                    _detailChip(
+                      Icons.verified_user_outlined,
+                      'OTP: ${_yesNo(user.otpVerified)}',
+                    ),
+                    _detailChip(
+                      Icons.account_balance_outlined,
+                      user.bankName ?? 'No bank',
+                    ),
+                    _detailChip(
+                      Icons.credit_card_outlined,
+                      user.accountNumber ?? 'No account',
+                    ),
+                    _detailChip(
+                      Icons.badge_outlined,
+                      user.nationalId ?? 'No NID',
+                    ),
+                    _detailChip(
+                      Icons.savings_outlined,
+                      'Wallet: ${Formatters.formatGrams(user.totalGrams ?? 0)}',
+                    ),
+                    _detailChip(
+                      Icons.lock_outline,
+                      'Locked: ${Formatters.formatGrams(user.lockedGrams ?? 0)}',
+                    ),
+                    _detailChip(
+                      Icons.account_balance_wallet_outlined,
+                      'Available: ${Formatters.formatGrams(user.availableGrams ?? 0)}',
+                    ),
+                    _detailChip(
+                      Icons.receipt_long_outlined,
+                      '${userTxs.length} txs • ${Formatters.formatGrams(txGrams)}',
+                    ),
+                    _detailChip(
+                      Icons.calendar_today_outlined,
+                      'Created: ${Formatters.formatDate(user.createdAt)}',
+                    ),
+                    if (user.lastLogin != null)
+                      _detailChip(
+                        Icons.login_outlined,
+                        'Last login: ${Formatters.formatDateTime(user.lastLogin!)}',
+                      ),
+                  ],
+                ),
+                if (!compact) ...[
+                  const SizedBox(height: 8),
+                  _idLine('UID', user.id),
+                  if (user.backendId != null)
+                    _idLine('Backend ID', user.backendId!),
+                  if (user.nidFrontUrl != null)
+                    _idLine('NID Front', user.nidFrontUrl!),
+                  if (user.nidBackUrl != null)
+                    _idLine('NID Back', user.nidBackUrl!),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  /// Get user initials from name or email
-  String _getUserInitials(User user) {
-    if (user.name != null && user.name!.isNotEmpty) {
-      final parts = user.name!.trim().split(' ');
-      if (parts.length > 1) {
-        return '${parts[0][0]}${parts[parts.length - 1][0]}'.toUpperCase();
-      }
-      return user.name![0].toUpperCase();
-    }
-    if (user.email != null && user.email!.isNotEmpty) {
-      return user.email![0].toUpperCase();
-    }
-    return 'U';
+  Widget _detailChip(IconData icon, String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+      decoration: BoxDecoration(
+        color: AppColors.grey100,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: AppColors.grey600),
+          const SizedBox(width: 4),
+          Text(text, style: TextStyle(fontSize: 11, color: AppColors.grey700)),
+        ],
+      ),
+    );
+  }
+
+  Widget _statusChip(String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
+          color: AppColors.primary,
+        ),
+      ),
+    );
+  }
+
+  Widget _idLine(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 4),
+      child: Text(
+        '$label: $value',
+        style: TextStyle(
+          fontSize: 10,
+          color: AppColors.grey600,
+          fontFamily: 'monospace',
+        ),
+        overflow: TextOverflow.ellipsis,
+      ),
+    );
+  }
+
+  String _yesNo(bool? value) =>
+      value == null ? 'Unknown' : (value ? 'Yes' : 'No');
+
+  /// Helper widget to display user avatar with proper image loading
+  Widget _buildUserAvatar(User user, {double radius = 24}) {
+    return UserAvatarImage(user: user, radius: radius);
   }
 }

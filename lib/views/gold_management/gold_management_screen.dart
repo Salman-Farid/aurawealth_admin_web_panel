@@ -12,8 +12,6 @@ import '../../widgets/common/error_widget.dart' as custom_error;
 import '../../widgets/common/modern_stat_card.dart';
 import '../../widgets/common/modern_card.dart';
 import '../../widgets/common/chart_card.dart';
-import '../../widgets/common/info_box.dart';
-import '../../widgets/common/chart_helpers.dart';
 import '../../widgets/common/animated_screen_wrapper.dart';
 
 class GoldManagementScreen extends StatelessWidget {

@@ -154,8 +154,10 @@ class _NotificationsScreenState extends State<NotificationsScreen>
       staggerDelay: 50.ms,
       itemBuilder: (context, index) {
         final device = devices[index];
+        final user = _userController.findUser(device.userId);
         return DeviceCardWidget(
           device: device,
+          user: user,
           index: index,
           onViewUserDevices: () => _showUserDevicesDialog(device.userId),
           onDelete: () => DeleteDeviceDialog.show(device),
@@ -165,7 +167,7 @@ class _NotificationsScreenState extends State<NotificationsScreen>
   }
 
   void _showUserDevicesDialog(String userId) {
-    final user = _userController.users.firstWhereOrNull((u) => u.id == userId);
+    final user = _userController.findUser(userId);
     if (user != null) {
       UserDevicesDialog.show(user);
     }

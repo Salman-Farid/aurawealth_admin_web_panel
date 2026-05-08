@@ -1,7 +1,9 @@
 import 'package:get/get.dart';
 import '../models/message.dart';
 import '../models/message_thread.dart';
+import '../models/user.dart';
 import '../services/api_service.dart';
+import 'user_controller.dart';
 
 class MessageController extends GetxController {
   final ApiService _apiService = ApiService();
@@ -16,7 +18,76 @@ class MessageController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    _ensureUserController();
     loadMessageThreads();
+  }
+
+  UserController? _ensureUserController() {
+    if (!Get.isRegistered<UserController>()) {
+      Get.lazyPut<UserController>(() => UserController(), fenix: true);
+    }
+    return Get.find<UserController>();
+  }
+
+  User? userForThread(MessageThread thread) {
+    final userController = _ensureUserController();
+    return userController?.findUser(thread.userId);
+  }
+
+  MessageThread _enrichThread(MessageThread thread) {
+    final user = userForThread(thread);
+    if (user == null) return thread;
+
+    final currentName = thread.userName.trim().toLowerCase();
+    final shouldReplaceName =
+        currentName.isEmpty ||
+        currentName == 'user' ||
+        currentName == 'unknown user' ||
+        currentName == 'demo user';
+
+    return thread.copyWith(
+      userId: user.firebaseUid ?? thread.userId,
+      userName: shouldReplaceName ? user.displayName : thread.userName,
+      userEmail: thread.userEmail ?? user.email,
+      phoneNumber: thread.phoneNumber ?? user.phoneNumber,
+      photoUrl: thread.photoUrl ?? user.photoUrl,
+    );
+  }
+
+  Future<void> _ensureUsersLoaded() async {
+    final userController = _ensureUserController();
+    if (userController == null) return;
+    if (userController.users.isNotEmpty || userController.isLoading.value) {
+      return;
+    }
+    await userController.loadUsers();
+  }
+
+  String displayNameForThread(MessageThread thread) {
+    final user = userForThread(thread);
+    if (user != null) return user.displayName;
+    final name = thread.userName.trim();
+    if (name.isNotEmpty &&
+        name.toLowerCase() != 'unknown user' &&
+        name.toLowerCase() != 'demo user') {
+      return name;
+    }
+    return thread.userId.isNotEmpty
+        ? 'User ${thread.userId.substring(0, thread.userId.length.clamp(0, 8))}'
+        : 'User';
+  }
+
+  String? secondaryInfoForThread(MessageThread thread) {
+    final user = userForThread(thread);
+    return user?.phoneNumber ??
+        user?.email ??
+        thread.phoneNumber ??
+        thread.userEmail;
+  }
+
+  String? photoUrlForThread(MessageThread thread) {
+    final user = userForThread(thread);
+    return user?.photoUrl ?? thread.photoUrl;
   }
 
   Future<void> loadMessageThreads() async {
@@ -24,10 +95,19 @@ class MessageController extends GetxController {
       isLoading.value = true;
       errorMessage.value = '';
 
+      await _ensureUsersLoaded();
       final data = await _apiService.getAdminChatInbox();
-      messageThreads.value = data
+      final threads = data
           .map((json) => MessageThread.fromJson(json))
+          .map(_enrichThread)
           .toList();
+      messageThreads.value = threads;
+
+      for (final thread in threads) {
+        print(
+          '💬 Message thread user=${thread.userId} name=${thread.userName} image=${thread.photoUrl ?? '<none>'}',
+        );
+      }
     } catch (e) {
       errorMessage.value = e.toString().replaceAll('Exception: ', '');
     } finally {
@@ -57,12 +137,16 @@ class MessageController extends GetxController {
       isSendingMessage.value = true;
       errorMessage.value = '';
 
-      await _apiService.sendAdminChatMessage(userId, message, messageType: 'live');
+      await _apiService.sendAdminChatMessage(
+        userId,
+        message,
+        messageType: 'live',
+      );
 
       // Reload messages to show the new reply
       await loadUserMessages(userId);
       await loadMessageThreads(); // Update unread counts
-      
+
       Get.snackbar('Success', 'Reply sent successfully');
     } catch (e) {
       errorMessage.value = e.toString().replaceAll('Exception: ', '');

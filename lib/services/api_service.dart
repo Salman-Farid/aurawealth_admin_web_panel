@@ -63,9 +63,12 @@ class ApiService {
       String errorMessage = 'An error occurred';
       try {
         final errorBody = json.decode(response.body);
-        errorMessage = errorBody['detail'] ?? errorBody['message'] ?? errorMessage;
+        errorMessage =
+            errorBody['detail'] ?? errorBody['message'] ?? errorMessage;
       } catch (_) {
-        errorMessage = response.body.isNotEmpty ? response.body : 'HTTP ${response.statusCode}';
+        errorMessage = response.body.isNotEmpty
+            ? response.body
+            : 'HTTP ${response.statusCode}';
       }
       throw Exception(errorMessage);
     }
@@ -75,11 +78,9 @@ class ApiService {
   Future<Map<String, dynamic>> adminLogin(String email, String password) async {
     final url = Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.adminLogin}');
     final body = 'username=$email&password=$password';
-    final response = await http.post(
-      url,
-      headers: _getHeaders(isFormData: true),
-      body: body,
-    ).timeout(Duration(seconds: AppConstants.apiTimeout));
+    final response = await http
+        .post(url, headers: _getHeaders(isFormData: true), body: body)
+        .timeout(Duration(seconds: AppConstants.apiTimeout));
     return _parseResponse(response) as Map<String, dynamic>;
   }
 
@@ -89,23 +90,24 @@ class ApiService {
     if (status != null && status.isNotEmpty) {
       url += '?status=$status';
     }
-    
+
     print('🌐 API: Fetching admin dashboard from: $url');
-    
-    final response = await http.get(
-      Uri.parse(url),
-      headers: _getHeaders(),
-    ).timeout(Duration(seconds: AppConstants.apiTimeout));
-    
+
+    final response = await http
+        .get(Uri.parse(url), headers: _getHeaders())
+        .timeout(Duration(seconds: AppConstants.apiTimeout));
+
     print('🌐 API: Response status code: ${response.statusCode}');
     print('🌐 API: Response body length: ${response.body.length}');
-    
+
     final decoded = _parseResponse(response);
-    
+
     if (decoded is List) {
       print('🌐 API: Received List with ${decoded.length} items');
       if (decoded.isNotEmpty) {
-        print('🌐 API: First item keys: ${(decoded.first as Map).keys.toList()}');
+        print(
+          '🌐 API: First item keys: ${(decoded.first as Map).keys.toList()}',
+        );
         print('🌐 API: First item sample: ${decoded.first}');
       }
       return decoded;
@@ -113,10 +115,12 @@ class ApiService {
     // Some backends wrap in a key
     if (decoded is Map && decoded.containsKey('transactions')) {
       final txList = decoded['transactions'] as List<dynamic>;
-      print('🌐 API: Received Map with transactions key, count: ${txList.length}');
+      print(
+        '🌐 API: Received Map with transactions key, count: ${txList.length}',
+      );
       return txList;
     }
-    
+
     print('🌐 API: Returning empty list');
     return [];
   }
@@ -125,77 +129,84 @@ class ApiService {
   Future<Map<String, dynamic>> setGoldPrice(double price) async {
     final url = Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.setPrice}');
     final body = json.encode({'price': price});
-    final response = await http.post(
-      url,
-      headers: _getHeaders(),
-      body: body,
-    ).timeout(Duration(seconds: AppConstants.apiTimeout));
+    final response = await http
+        .post(url, headers: _getHeaders(), body: body)
+        .timeout(Duration(seconds: AppConstants.apiTimeout));
     return _parseResponse(response) as Map<String, dynamic>;
   }
 
   // Get Current Gold Price
   Future<Map<String, dynamic>> getGoldPrice() async {
     final url = Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.getPrice}');
-    final response = await http.get(
-      url,
-      headers: _getHeaders(),
-    ).timeout(Duration(seconds: AppConstants.apiTimeout));
+    final response = await http
+        .get(url, headers: _getHeaders())
+        .timeout(Duration(seconds: AppConstants.apiTimeout));
     return _parseResponse(response) as Map<String, dynamic>;
   }
 
   // Credit Grams (In-Store Purchase)
   Future<Map<String, dynamic>> creditGrams(String userId, double grams) async {
-    final url = Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.adminBuyCredit}');
+    final url = Uri.parse(
+      '${AppConstants.baseUrl}${ApiEndpoints.adminBuyCredit}',
+    );
     final body = json.encode({'user_id': userId, 'grams': grams});
-    final response = await http.post(
-      url,
-      headers: _getHeaders(),
-      body: body,
-    ).timeout(Duration(seconds: AppConstants.apiTimeout));
+    final response = await http
+        .post(url, headers: _getHeaders(), body: body)
+        .timeout(Duration(seconds: AppConstants.apiTimeout));
     return _parseResponse(response) as Map<String, dynamic>;
   }
 
   // Redeem Code
   Future<Map<String, dynamic>> redeemCode(String code) async {
-    final url = Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.adminRedeemCode(code)}');
-    final response = await http.post(
-      url,
-      headers: _getHeaders(),
-    ).timeout(Duration(seconds: AppConstants.apiTimeout));
+    final url = Uri.parse(
+      '${AppConstants.baseUrl}${ApiEndpoints.adminRedeemCode(code)}',
+    );
+    final response = await http
+        .post(url, headers: _getHeaders())
+        .timeout(Duration(seconds: AppConstants.apiTimeout));
     return _parseResponse(response) as Map<String, dynamic>;
   }
 
   // Approve Transaction
-  Future<Map<String, dynamic>> approveTransaction(String txId, {String? note}) async {
-    final url = Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.adminApprove(txId)}');
-    final body = json.encode(note != null ? {'note': note} : <String, dynamic>{});
-    final response = await http.post(
-      url,
-      headers: _getHeaders(),
-      body: body,
-    ).timeout(Duration(seconds: AppConstants.apiTimeout));
+  Future<Map<String, dynamic>> approveTransaction(
+    String txId, {
+    String? note,
+  }) async {
+    final url = Uri.parse(
+      '${AppConstants.baseUrl}${ApiEndpoints.adminApprove(txId)}',
+    );
+    final body = json.encode(
+      note != null ? {'note': note} : <String, dynamic>{},
+    );
+    final response = await http
+        .post(url, headers: _getHeaders(), body: body)
+        .timeout(Duration(seconds: AppConstants.apiTimeout));
     return _parseResponse(response) as Map<String, dynamic>;
   }
 
   // Reject Transaction
-  Future<Map<String, dynamic>> rejectTransaction(String txId, {String? note}) async {
-    final url = Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.adminReject(txId)}');
-    final body = json.encode(note != null ? {'note': note} : <String, dynamic>{});
-    final response = await http.post(
-      url,
-      headers: _getHeaders(),
-      body: body,
-    ).timeout(Duration(seconds: AppConstants.apiTimeout));
+  Future<Map<String, dynamic>> rejectTransaction(
+    String txId, {
+    String? note,
+  }) async {
+    final url = Uri.parse(
+      '${AppConstants.baseUrl}${ApiEndpoints.adminReject(txId)}',
+    );
+    final body = json.encode(
+      note != null ? {'note': note} : <String, dynamic>{},
+    );
+    final response = await http
+        .post(url, headers: _getHeaders(), body: body)
+        .timeout(Duration(seconds: AppConstants.apiTimeout));
     return _parseResponse(response) as Map<String, dynamic>;
   }
 
   // Get Admin Chat Inbox (all user threads)
   Future<List<dynamic>> getAdminChatInbox() async {
     final url = Uri.parse('${AppConstants.baseUrl}/admin/chat/inbox');
-    final response = await http.get(
-      url,
-      headers: _getHeaders(),
-    ).timeout(Duration(seconds: AppConstants.apiTimeout));
+    final response = await http
+        .get(url, headers: _getHeaders())
+        .timeout(Duration(seconds: AppConstants.apiTimeout));
     final decoded = _parseResponse(response);
     if (decoded is List) return decoded;
     if (decoded is Map && decoded.containsKey('threads')) {
@@ -205,16 +216,19 @@ class ApiService {
   }
 
   // Get Admin Chat History for a User
-  Future<List<dynamic>> getAdminChatHistory(String userId, {int? limit, int? offset}) async {
+  Future<List<dynamic>> getAdminChatHistory(
+    String userId, {
+    int? limit,
+    int? offset,
+  }) async {
     var url = '${AppConstants.baseUrl}/admin/chat/history/$userId';
     final params = <String>[];
     if (limit != null) params.add('limit=$limit');
     if (offset != null) params.add('offset=$offset');
     if (params.isNotEmpty) url += '?${params.join('&')}';
-    final response = await http.get(
-      Uri.parse(url),
-      headers: _getHeaders(),
-    ).timeout(Duration(seconds: AppConstants.apiTimeout));
+    final response = await http
+        .get(Uri.parse(url), headers: _getHeaders())
+        .timeout(Duration(seconds: AppConstants.apiTimeout));
     final decoded = _parseResponse(response);
     if (decoded is List) return decoded;
     if (decoded is Map && decoded.containsKey('messages')) {
@@ -224,39 +238,55 @@ class ApiService {
   }
 
   // Send Admin Chat Message (REST fallback)
-  Future<Map<String, dynamic>> sendAdminChatMessage(String userId, String body, {String? subject, String? messageType}) async {
+  Future<Map<String, dynamic>> sendAdminChatMessage(
+    String userId,
+    String body, {
+    String? subject,
+    String? messageType,
+  }) async {
     final url = Uri.parse('${AppConstants.baseUrl}/admin/chat/send/$userId');
     final payload = <String, dynamic>{
       'body': body,
       'message_type': messageType ?? 'live',
     };
     if (subject != null) payload['subject'] = subject;
-    final response = await http.post(
-      url,
-      headers: _getHeaders(),
-      body: json.encode(payload),
-    ).timeout(Duration(seconds: AppConstants.apiTimeout));
+    final response = await http
+        .post(url, headers: _getHeaders(), body: json.encode(payload))
+        .timeout(Duration(seconds: AppConstants.apiTimeout));
     return _parseResponse(response) as Map<String, dynamic>;
   }
 
   // Mark Admin Chat Thread as Read
   Future<Map<String, dynamic>> markAdminChatRead(String userId) async {
     final url = Uri.parse('${AppConstants.baseUrl}/admin/chat/read/$userId');
-    final response = await http.post(
-      url,
-      headers: _getHeaders(),
-      body: json.encode({}),
-    ).timeout(Duration(seconds: AppConstants.apiTimeout));
+    final response = await http
+        .post(url, headers: _getHeaders(), body: json.encode({}))
+        .timeout(Duration(seconds: AppConstants.apiTimeout));
     return _parseResponse(response) as Map<String, dynamic>;
   }
 
   // Get All Users
-  Future<List<dynamic>> getAllUsers() async {
-    final url = Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.getAllUsers}');
-    final response = await http.get(
-      url,
-      headers: _getHeaders(),
-    ).timeout(Duration(seconds: AppConstants.apiTimeout));
+  Future<List<dynamic>> getAllUsers({
+    int skip = 0,
+    int limit = 500,
+    String? search,
+    bool includeFirestore = true,
+  }) async {
+    final queryParams = <String, String>{
+      'skip': skip.toString(),
+      'limit': limit.toString(),
+      'include_firestore': includeFirestore.toString(),
+    };
+    if (search != null && search.trim().isNotEmpty) {
+      queryParams['search'] = search.trim();
+    }
+
+    final uri = Uri.parse(
+      '${AppConstants.baseUrl}${ApiEndpoints.getAllUsers}',
+    ).replace(queryParameters: queryParams);
+    final response = await http
+        .get(uri, headers: _getHeaders())
+        .timeout(Duration(seconds: AppConstants.apiTimeout));
     final decoded = _parseResponse(response);
     if (decoded is List) return decoded;
     if (decoded is Map && decoded.containsKey('users')) {
@@ -277,20 +307,17 @@ class ApiService {
     required String body,
     Map<String, dynamic>? data,
   }) async {
-    final url = Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.sendNotification}');
-    final payload = <String, dynamic>{
-      'title': title,
-      'body': body,
-    };
+    final url = Uri.parse(
+      '${AppConstants.baseUrl}${ApiEndpoints.sendNotification}',
+    );
+    final payload = <String, dynamic>{'title': title, 'body': body};
     if (userId != null) payload['user_id'] = userId;
     if (userIds != null) payload['user_ids'] = userIds;
     if (data != null) payload['data'] = data;
 
-    final response = await http.post(
-      url,
-      headers: _getHeaders(),
-      body: json.encode(payload),
-    ).timeout(Duration(seconds: AppConstants.apiTimeout));
+    final response = await http
+        .post(url, headers: _getHeaders(), body: json.encode(payload))
+        .timeout(Duration(seconds: AppConstants.apiTimeout));
     return _parseResponse(response) as Map<String, dynamic>;
   }
 
@@ -303,21 +330,18 @@ class ApiService {
     String? imageUrl,
     Map<String, dynamic>? data,
   }) async {
-    final url = Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.sendNotificationWithImage}');
-    final payload = <String, dynamic>{
-      'title': title,
-      'body': body,
-    };
+    final url = Uri.parse(
+      '${AppConstants.baseUrl}${ApiEndpoints.sendNotificationWithImage}',
+    );
+    final payload = <String, dynamic>{'title': title, 'body': body};
     if (userId != null) payload['user_id'] = userId;
     if (userIds != null) payload['user_ids'] = userIds;
     if (imageUrl != null) payload['image_url'] = imageUrl;
     if (data != null) payload['data'] = data;
 
-    final response = await http.post(
-      url,
-      headers: _getHeaders(),
-      body: json.encode(payload),
-    ).timeout(Duration(seconds: AppConstants.apiTimeout));
+    final response = await http
+        .post(url, headers: _getHeaders(), body: json.encode(payload))
+        .timeout(Duration(seconds: AppConstants.apiTimeout));
     return _parseResponse(response) as Map<String, dynamic>;
   }
 
@@ -327,18 +351,15 @@ class ApiService {
     required String body,
     Map<String, dynamic>? data,
   }) async {
-    final url = Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.sendBroadcast}');
-    final payload = <String, dynamic>{
-      'title': title,
-      'body': body,
-    };
+    final url = Uri.parse(
+      '${AppConstants.baseUrl}${ApiEndpoints.sendBroadcast}',
+    );
+    final payload = <String, dynamic>{'title': title, 'body': body};
     if (data != null) payload['data'] = data;
 
-    final response = await http.post(
-      url,
-      headers: _getHeaders(),
-      body: json.encode(payload),
-    ).timeout(Duration(seconds: AppConstants.apiTimeout));
+    final response = await http
+        .post(url, headers: _getHeaders(), body: json.encode(payload))
+        .timeout(Duration(seconds: AppConstants.apiTimeout));
     return _parseResponse(response) as Map<String, dynamic>;
   }
 
@@ -349,19 +370,16 @@ class ApiService {
     String? imageUrl,
     Map<String, dynamic>? data,
   }) async {
-    final url = Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.broadcastWithImage}');
-    final payload = <String, dynamic>{
-      'title': title,
-      'body': body,
-    };
+    final url = Uri.parse(
+      '${AppConstants.baseUrl}${ApiEndpoints.broadcastWithImage}',
+    );
+    final payload = <String, dynamic>{'title': title, 'body': body};
     if (imageUrl != null) payload['image_url'] = imageUrl;
     if (data != null) payload['data'] = data;
 
-    final response = await http.post(
-      url,
-      headers: _getHeaders(),
-      body: json.encode(payload),
-    ).timeout(Duration(seconds: AppConstants.apiTimeout));
+    final response = await http
+        .post(url, headers: _getHeaders(), body: json.encode(payload))
+        .timeout(Duration(seconds: AppConstants.apiTimeout));
     return _parseResponse(response) as Map<String, dynamic>;
   }
 
@@ -376,33 +394,35 @@ class ApiService {
       'skip': skip.toString(),
       'limit': limit.toString(),
     };
-    final uri = Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.devicesAll}')
-        .replace(queryParameters: queryParams);
-    
-    final response = await http.get(
-      uri,
-      headers: _getHeaders(),
-    ).timeout(Duration(seconds: AppConstants.apiTimeout));
+    final uri = Uri.parse(
+      '${AppConstants.baseUrl}${ApiEndpoints.devicesAll}',
+    ).replace(queryParameters: queryParams);
+
+    final response = await http
+        .get(uri, headers: _getHeaders())
+        .timeout(Duration(seconds: AppConstants.apiTimeout));
     return _parseResponse(response) as Map<String, dynamic>;
   }
 
   // Get User Devices
   Future<Map<String, dynamic>> getUserDevices(String userId) async {
-    final url = Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.devicesUser(userId)}');
-    final response = await http.get(
-      url,
-      headers: _getHeaders(),
-    ).timeout(Duration(seconds: AppConstants.apiTimeout));
+    final url = Uri.parse(
+      '${AppConstants.baseUrl}${ApiEndpoints.devicesUser(userId)}',
+    );
+    final response = await http
+        .get(url, headers: _getHeaders())
+        .timeout(Duration(seconds: AppConstants.apiTimeout));
     return _parseResponse(response) as Map<String, dynamic>;
   }
 
   // Delete Device
   Future<Map<String, dynamic>> deleteDevice(String deviceId) async {
-    final url = Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.deleteDevice(deviceId)}');
-    final response = await http.delete(
-      url,
-      headers: _getHeaders(),
-    ).timeout(Duration(seconds: AppConstants.apiTimeout));
+    final url = Uri.parse(
+      '${AppConstants.baseUrl}${ApiEndpoints.deleteDevice(deviceId)}',
+    );
+    final response = await http
+        .delete(url, headers: _getHeaders())
+        .timeout(Duration(seconds: AppConstants.apiTimeout));
     return _parseResponse(response) as Map<String, dynamic>;
   }
 
@@ -413,50 +433,48 @@ class ApiService {
     required String deviceType,
     String? deviceName,
   }) async {
-    final uri = Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.registerDevice}')
-        .replace(queryParameters: {'user_id': userId});
+    final uri = Uri.parse(
+      '${AppConstants.baseUrl}${ApiEndpoints.registerDevice}',
+    ).replace(queryParameters: {'user_id': userId});
     final payload = <String, dynamic>{
       'token': token,
       'device_type': deviceType,
     };
     if (deviceName != null) payload['device_name'] = deviceName;
 
-    final response = await http.post(
-      uri,
-      headers: _getHeaders(),
-      body: json.encode(payload),
-    ).timeout(Duration(seconds: AppConstants.apiTimeout));
+    final response = await http
+        .post(uri, headers: _getHeaders(), body: json.encode(payload))
+        .timeout(Duration(seconds: AppConstants.apiTimeout));
     return _parseResponse(response) as Map<String, dynamic>;
   }
 
   // Get Device Statistics
   Future<Map<String, dynamic>> getDeviceStats() async {
     final url = Uri.parse('${AppConstants.baseUrl}${ApiEndpoints.deviceStats}');
-    final response = await http.get(
-      url,
-      headers: _getHeaders(),
-    ).timeout(Duration(seconds: AppConstants.apiTimeout));
+    final response = await http
+        .get(url, headers: _getHeaders())
+        .timeout(Duration(seconds: AppConstants.apiTimeout));
     return _parseResponse(response) as Map<String, dynamic>;
   }
 
   // Generic POST for chat endpoints
-  Future<Map<String, dynamic>> post(String endpoint, Map<String, dynamic> body) async {
+  Future<Map<String, dynamic>> post(
+    String endpoint,
+    Map<String, dynamic> body,
+  ) async {
     final url = Uri.parse(endpoint);
-    final response = await http.post(
-      url,
-      headers: _getHeaders(),
-      body: json.encode(body),
-    ).timeout(Duration(seconds: AppConstants.apiTimeout));
+    final response = await http
+        .post(url, headers: _getHeaders(), body: json.encode(body))
+        .timeout(Duration(seconds: AppConstants.apiTimeout));
     return _parseResponse(response) as Map<String, dynamic>;
   }
 
   // Generic GET for chat endpoints
   Future<dynamic> get(String endpoint) async {
     final url = Uri.parse(endpoint);
-    final response = await http.get(
-      url,
-      headers: _getHeaders(),
-    ).timeout(Duration(seconds: AppConstants.apiTimeout));
+    final response = await http
+        .get(url, headers: _getHeaders())
+        .timeout(Duration(seconds: AppConstants.apiTimeout));
     return _parseResponse(response);
   }
 }

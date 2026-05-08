@@ -19,7 +19,7 @@ import 'users/users_screen.dart';
 import 'gold_management/gold_management_screen.dart';
 import 'messages/messages_screen.dart';
 import 'notifications/notifications_screen.dart';
-import 'transactions/store_operations_screen.dart';
+import 'store_operations_screen/store_operations_screen.dart';
 
 class MainContainer extends StatelessWidget {
   MainContainer({Key? key}) : super(key: key);

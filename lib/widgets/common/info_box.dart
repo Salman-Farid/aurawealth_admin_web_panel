@@ -105,7 +105,6 @@ class InfoBox extends StatelessWidget {
       case InfoBoxType.error:
         return AppColors.error;
       case InfoBoxType.info:
-      default:
         return AppColors.info;
     }
   }
@@ -119,7 +118,6 @@ class InfoBox extends StatelessWidget {
       case InfoBoxType.error:
         return Icons.error_outline;
       case InfoBoxType.info:
-      default:
         return Icons.info_outline;
     }
   }

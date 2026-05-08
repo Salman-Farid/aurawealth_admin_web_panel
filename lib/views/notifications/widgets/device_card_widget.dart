@@ -6,10 +6,12 @@ import '../../../core/constants/app_colors.dart';
 import '../../../widgets/common/modern_card.dart';
 import '../../../widgets/common/status_badge.dart';
 import '../../../models/device.dart';
+import '../../../models/user.dart';
 import '../helpers/date_formatter.dart';
 
 class DeviceCardWidget extends StatelessWidget {
   final Device device;
+  final User? user;
   final int index;
   final VoidCallback onViewUserDevices;
   final VoidCallback onDelete;
@@ -17,6 +19,7 @@ class DeviceCardWidget extends StatelessWidget {
   const DeviceCardWidget({
     Key? key,
     required this.device,
+    this.user,
     required this.index,
     required this.onViewUserDevices,
     required this.onDelete,
@@ -25,16 +28,16 @@ class DeviceCardWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ModernCard(
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          _buildDeviceIcon(),
-          const SizedBox(width: 16),
-          Expanded(child: _buildDeviceInfo()),
-          _buildActionsMenu(),
-        ],
-      ),
-    )
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              _buildDeviceIcon(),
+              const SizedBox(width: 16),
+              Expanded(child: _buildDeviceInfo()),
+              _buildActionsMenu(),
+            ],
+          ),
+        )
         .animate(delay: Duration(milliseconds: 50 * index))
         .fadeIn(duration: 400.ms)
         .slideX(begin: -0.1, end: 0);
@@ -49,10 +52,7 @@ class DeviceCardWidget extends StatelessWidget {
             : AppColors.grey200,
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Text(
-        device.deviceIcon,
-        style: const TextStyle(fontSize: 24),
-      ),
+      child: Text(device.deviceIcon, style: const TextStyle(fontSize: 24)),
     );
   }
 
@@ -64,7 +64,10 @@ class DeviceCardWidget extends StatelessWidget {
           children: [
             Expanded(
               child: Text(
-                device.userName ?? device.userEmail ?? 'Unknown User',
+                user?.displayName ??
+                    device.userName ??
+                    device.userEmail ??
+                    'Unknown User',
                 style: const TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
@@ -81,11 +84,8 @@ class DeviceCardWidget extends StatelessWidget {
         ),
         const SizedBox(height: 6),
         Text(
-          device.userEmail ?? 'No email',
-          style: TextStyle(
-            fontSize: 13,
-            color: AppColors.grey600,
-          ),
+          user?.email ?? device.userEmail ?? 'No email',
+          style: TextStyle(fontSize: 13, color: AppColors.grey600),
         ),
         const SizedBox(height: 4),
         Row(
@@ -94,20 +94,14 @@ class DeviceCardWidget extends StatelessWidget {
             const SizedBox(width: 4),
             Text(
               device.deviceName ?? device.deviceType,
-              style: TextStyle(
-                fontSize: 12,
-                color: AppColors.grey600,
-              ),
+              style: TextStyle(fontSize: 12, color: AppColors.grey600),
             ),
             const SizedBox(width: 12),
             Icon(Icons.access_time_rounded, size: 14, color: AppColors.grey500),
             const SizedBox(width: 4),
             Text(
               NotificationDateFormatter.formatDate(device.createdAt),
-              style: TextStyle(
-                fontSize: 12,
-                color: AppColors.grey600,
-              ),
+              style: TextStyle(fontSize: 12, color: AppColors.grey600),
             ),
           ],
         ),

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import '../../../controllers/notification_controller.dart';
-import '../../../core/constants/app_colors.dart';
 
 class DeviceFiltersWidget extends StatelessWidget {
   const DeviceFiltersWidget({Key? key}) : super(key: key);

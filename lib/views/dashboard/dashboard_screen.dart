@@ -4,15 +4,11 @@ import 'package:fl_chart/fl_chart.dart';
 import '../../controllers/gold_controller.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_constants.dart';
-import '../../core/utils/responsive.dart';
 import '../../core/utils/formatters.dart';
 import '../../widgets/common/loading_widget.dart';
 import '../../widgets/common/error_widget.dart' as custom_error;
-import '../../widgets/common/modern_stat_card.dart';
 import '../../widgets/common/modern_card.dart';
 import '../../widgets/common/chart_card.dart';
-import '../../widgets/common/info_box.dart';
-import '../../widgets/common/chart_helpers.dart';
 
 class GoldManagementScreen extends StatelessWidget {
   const GoldManagementScreen({Key? key}) : super(key: key);
