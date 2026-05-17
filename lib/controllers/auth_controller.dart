@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:get/get.dart';
 import '../services/api_service.dart';
 import '../services/storage_service.dart';
@@ -27,23 +29,42 @@ class AuthController extends GetxController {
       isLoading.value = true;
       errorMessage.value = '';
 
+      print('[Auth] Login started for: $email');
       final response = await _apiService.adminLogin(email, password);
-      
+      print('[Auth] Login response keys: ${response.keys.toList()}');
+
       final token = response['access_token'];
       if (token != null) {
+        print('[Auth] Access token received; saving auth state');
         await _storage.saveAuthToken(token);
         await _storage.saveUserEmail(email);
         isAuthenticated.value = true;
-        await AdminFcmService.initialize();
-        
+        print('[Auth] Auth state saved. Calling initAdminFCM()');
+        await initAdminFCM();
+        print('[Auth] initAdminFCM() completed. Navigating to dashboard');
+
         Get.offAllNamed(AppRoutes.dashboard);
       } else {
+        print('[Auth] Login response missing access_token: $response');
         throw Exception('Invalid response from server');
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('[Auth] Login failed or post-login setup failed: $e');
+      print('[Auth] Login stack trace: $stackTrace');
       errorMessage.value = e.toString().replaceAll('Exception: ', '');
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  Future<void> initAdminFCM() async {
+    try {
+      print('[Auth] initAdminFCM() started');
+      await AdminFcmService.initialize();
+      print('[Auth] initAdminFCM() finished successfully');
+    } catch (e, stackTrace) {
+      print('[Auth] initAdminFCM() threw an exception: $e');
+      print('[Auth] initAdminFCM() stack trace: $stackTrace');
     }
   }
 
