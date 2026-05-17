@@ -19,6 +19,7 @@ void main() async {
       options: DefaultFirebaseOptions.currentPlatform,
     );
     print('[Firebase] Admin panel initialization successful');
+
   }
 
   if (StorageService().isAuthenticated) {
