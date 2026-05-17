@@ -14,6 +14,7 @@ void main() async {
   // Initialize storage service
   await StorageService().init();
 
+
   if (Firebase.apps.isEmpty) {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
