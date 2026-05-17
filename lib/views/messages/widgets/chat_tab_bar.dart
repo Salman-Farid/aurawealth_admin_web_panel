@@ -7,10 +7,7 @@ import 'tab_chip.dart';
 class ChatTabBar extends StatelessWidget {
   final AdminChatController adminChat;
 
-  const ChatTabBar({
-    super.key,
-    required this.adminChat,
-  });
+  const ChatTabBar({super.key, required this.adminChat});
 
   @override
   Widget build(BuildContext context) {
@@ -37,22 +34,15 @@ class ChatTabBar extends StatelessWidget {
               onTap: () => adminChat.setMessageTypeFilter('static'),
             ),
             Obx(() {
-              final liveCount = adminChat.messages
-                  .where((m) => m.messageType == 'live')
-                  .length;
-              final mailCount = adminChat.messages
-                  .where((m) => m.messageType == 'static')
-                  .length;
+              final liveCount = adminChat.liveMessages.length;
+              final mailCount = adminChat.mailMessages.length;
               return Padding(
                 padding: const EdgeInsets.only(left: 12),
                 child: Text(
                   isLive
                       ? '$liveCount message${liveCount == 1 ? "" : "s"}'
                       : '$mailCount email${mailCount == 1 ? "" : "s"}',
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: Colors.grey.shade400,
-                  ),
+                  style: TextStyle(fontSize: 11, color: Colors.grey.shade400),
                 ),
               );
             }),

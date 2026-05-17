@@ -39,7 +39,12 @@ class AuthController extends GetxController {
         await _storage.saveAuthToken(token);
         await _storage.saveUserEmail(email);
         isAuthenticated.value = true;
-        print('[Auth] Auth state saved. Calling initAdminFCM()');
+        print(
+          '[Auth] Auth state saved. Calling initAdminFCM() after Firebase initialization',
+        );
+        print(
+          '[Auth] initAdminFCM() call condition met: login succeeded and access_token saved',
+        );
         await initAdminFCM();
         print('[Auth] initAdminFCM() completed. Navigating to dashboard');
 

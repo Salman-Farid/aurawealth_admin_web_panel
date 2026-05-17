@@ -14,6 +14,8 @@ class AdminChatController extends GetxController {
   final FirestoreAdminChatService _chatService;
 
   final messages = <Message>[].obs;
+  final liveMessages = <Message>[].obs;
+  final mailMessages = <Message>[].obs;
   final isConnected = false.obs;
   final isLoadingHistory = false.obs;
   final isSending = false.obs;
@@ -21,6 +23,7 @@ class AdminChatController extends GetxController {
   final unreadCount = 0.obs;
 
   StreamSubscription<List<Message>>? _messagesSub;
+  StreamSubscription<List<Message>>? _mailsSub;
 
   @override
   void onInit() {
@@ -31,6 +34,7 @@ class AdminChatController extends GetxController {
   @override
   void onClose() {
     _messagesSub?.cancel();
+    _mailsSub?.cancel();
     super.onClose();
   }
 
@@ -43,13 +47,21 @@ class AdminChatController extends GetxController {
   Future<void> reloadHistory() async {
     isLoadingHistory.value = true;
     try {
-      final loaded = await _chatService.loadRecentMessages(
+      final loadedLive = await _chatService.loadRecentMessages(
         targetUserId,
         limit: 1000,
       );
-      _setMessages(loaded);
+      final loadedMail = await _chatService.loadMailHistory(
+        targetUserId,
+        limit: 1000,
+      );
+      _setLiveMessages(loadedLive.where((m) => m.messageType == 'live'));
+      _setMailMessages(loadedMail);
       _recomputeUnread();
-      _log('Firestore history loaded: ${loaded.length} messages');
+      _log(
+        'Firestore history loaded: ${liveMessages.length} live messages, '
+        '${mailMessages.length} mails',
+      );
     } catch (e, st) {
       _log('Firestore history load failed: $e');
       _log('$st');
@@ -60,18 +72,33 @@ class AdminChatController extends GetxController {
 
   void _subscribe() {
     _messagesSub?.cancel();
+    _mailsSub?.cancel();
+
     _messagesSub = _chatService
         .watchMessages(targetUserId)
         .listen(
           (incoming) {
             isConnected.value = true;
-            _setMessages(incoming);
+            _setLiveMessages(incoming.where((m) => m.messageType == 'live'));
             _recomputeUnread();
             unawaited(_chatService.markUserMessagesRead(targetUserId));
           },
           onError: (e) {
             isConnected.value = false;
-            _log('Firestore stream error: $e');
+            _log('Firestore messages stream error: $e');
+          },
+        );
+
+    _mailsSub = _chatService
+        .watchMails(targetUserId)
+        .listen(
+          (incoming) {
+            isConnected.value = true;
+            _setMailMessages(incoming);
+          },
+          onError: (e) {
+            isConnected.value = false;
+            _log('Firestore mails stream error: $e');
           },
         );
   }
@@ -94,12 +121,20 @@ class AdminChatController extends GetxController {
 
     isSending.value = true;
     try {
-      await _chatService.sendAdminMessage(
-        userId: targetUserId,
-        content: trimmed,
-        messageType: messageType,
-        subject: subject,
-      );
+      if (messageType == 'static') {
+        await _chatService.sendMail(
+          userId: targetUserId,
+          subject: subject!.trim(),
+          content: trimmed,
+        );
+      } else {
+        await _chatService.sendAdminMessage(
+          userId: targetUserId,
+          content: trimmed,
+          messageType: messageType,
+          subject: subject,
+        );
+      }
     } catch (e) {
       _log('sendMessage failed: $e');
       Get.snackbar(
@@ -112,13 +147,28 @@ class AdminChatController extends GetxController {
     }
   }
 
-  void _setMessages(List<Message> loaded) {
-    loaded.sort((a, b) => a.createdAt.compareTo(b.createdAt));
-    messages.assignAll(loaded);
+  void _setLiveMessages(Iterable<Message> loaded) {
+    final sorted = loaded.toList()
+      ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+    liveMessages.assignAll(sorted);
+    _syncMessages();
+  }
+
+  void _setMailMessages(Iterable<Message> loaded) {
+    final sorted = loaded.toList()
+      ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+    mailMessages.assignAll(sorted);
+    _syncMessages();
+  }
+
+  void _syncMessages() {
+    final combined = <Message>[...liveMessages, ...mailMessages]
+      ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+    messages.assignAll(combined);
   }
 
   void _recomputeUnread() {
-    unreadCount.value = messages
+    unreadCount.value = liveMessages
         .where((m) => m.direction == 'user_to_admin' && !m.isRead)
         .length;
   }
@@ -126,7 +176,8 @@ class AdminChatController extends GetxController {
   List<Message> get filteredMessages {
     final f = messageTypeFilter.value;
     if (f == 'all') return messages.toList();
-    return messages.where((m) => m.messageType == f).toList();
+    if (f == 'static') return mailMessages.toList();
+    return liveMessages.toList();
   }
 
   void setMessageTypeFilter(String type) {

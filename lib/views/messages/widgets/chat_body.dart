@@ -70,13 +70,9 @@ class _ChatBodyState extends State<ChatBody> {
       color: chatBg,
       child: Obx(() {
         final filter = widget.adminChat.messageTypeFilter.value;
-        final all = widget.adminChat.messages;
+        final displayed = widget.adminChat.filteredMessages;
 
-        final displayed = (filter == 'all' || filter == 'live')
-            ? all.where((m) => m.messageType == 'live').toList()
-            : all.where((m) => m.messageType == 'static').toList();
-
-        if (widget.adminChat.isLoadingHistory.value && all.isEmpty) {
+        if (widget.adminChat.isLoadingHistory.value && displayed.isEmpty) {
           return const Center(child: CircularProgressIndicator());
         }
 

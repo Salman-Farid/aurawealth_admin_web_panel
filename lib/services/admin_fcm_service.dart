@@ -2,6 +2,7 @@
 
 import 'dart:convert';
 
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
@@ -19,6 +20,25 @@ class AdminFcmService {
   static Future<void> initialize() async {
     try {
       print('[AdminFCM] initialize() started');
+      print(
+        '[AdminFCM] Firebase apps initialized count: ${Firebase.apps.length}',
+      );
+      print(
+        '[AdminFCM] Firebase default app available before FCM init: '
+        '${Firebase.apps.isNotEmpty}',
+      );
+      final currentUri = Uri.base;
+      final isSecureFcmOrigin =
+          currentUri.scheme == 'https' ||
+          currentUri.host == 'localhost' ||
+          currentUri.host == '127.0.0.1';
+      print('[AdminFCM] Current page URL for Web FCM: $currentUri');
+      print(
+        '[AdminFCM] Web FCM secure origin check: '
+        'scheme=${currentUri.scheme}, host=${currentUri.host}, '
+        'allowed=$isSecureFcmOrigin '
+        '(must be HTTPS or localhost/127.0.0.1)',
+      );
       final authToken = _storage.getAuthToken();
       print(
         '[AdminFCM] Auth token available before FCM registration: '
@@ -32,16 +52,28 @@ class AdminFcmService {
       );
       print('[AdminFCM] Permission: ${settings.authorizationStatus}');
 
-      final token = await FirebaseMessaging.instance.getToken(
-        vapidKey:
-            'BDUiGW559E7LUJ5PZMIcvJxBAmwpPEpCRfu3Emj8Xg6B5SfJNL5Yt667Ms3qubMzA8lrMbcnQ5yhHaYb60Imnfw',
+      String? token;
+      try {
+        token = await FirebaseMessaging.instance.getToken(
+          vapidKey:
+              'BDUiGW559E7LUJ5PZMIcvJxBAmwpPEpCRfu3Emj8Xg6B5SfJNL5Yt667Ms3qubMzA8lrMbcnQ5yhHaYb60Imnfw',
+        );
+        print('[AdminFCM] Raw FCM getToken() value: $token');
+      } catch (e, stackTrace) {
+        print('[AdminFCM] getToken() error: $e');
+        print('[AdminFCM] getToken() stack trace: $stackTrace');
+        rethrow;
+      }
+      print(
+        '[AdminFCM] Device token adding decision: '
+        '${token != null && token.isNotEmpty ? 'will add/send token to backend' : 'will NOT add/send token because token is null/empty'}',
       );
-      print('[AdminFCM] Fetched FCM token: $token');
       if (token == null || token.isEmpty) {
         print('[AdminFCM] No FCM token available');
         return;
       }
 
+      print('[AdminFCM] About to send/add device token to backend');
       await _registerToken(token);
       FirebaseMessaging.instance.onTokenRefresh.listen(
         (refreshedToken) {
@@ -95,9 +127,11 @@ class AdminFcmService {
       );
       print('[AdminFCM] POST /admin/fcm-token request body: $encodedBody');
 
+      print('[AdminFCM] HTTP POST is being made now');
       final response = await http
           .post(url, headers: headers, body: encodedBody)
           .timeout(Duration(seconds: AppConstants.apiTimeout));
+      print('[AdminFCM] HTTP POST completed');
 
       print(
         '[AdminFCM] POST /admin/fcm-token response status: '
