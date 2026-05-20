@@ -36,21 +36,21 @@ class RedeemCodePanel extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // === TOP SECTION: Header ===
+          // === Header ===
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+            padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
             child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(7),
                   decoration: BoxDecoration(
                     color: AppColors.warning.withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(Icons.qr_code_scanner,
-                      color: AppColors.warning, size: 20),
+                      color: AppColors.warning, size: 18),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 10),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -60,19 +60,18 @@ class RedeemCodePanel extends StatelessWidget {
                         style: Theme.of(context)
                             .textTheme
                             .titleMedium
-                            ?.copyWith(fontWeight: FontWeight.w600),
+                            ?.copyWith(fontWeight: FontWeight.w600, fontSize: 15),
                       ),
                       Text(
                         'For store sell or exchange',
-                        style:
-                            TextStyle(color: AppColors.grey500, fontSize: 12),
+                        style: TextStyle(color: AppColors.grey500, fontSize: 11),
                       ),
                     ],
                   ),
                 ),
                 SizedBox(
-                  width: 40,
-                  height: 40,
+                  width: 36,
+                  height: 36,
                   child: Lottie.asset(
                     'assets/lottie/Transaction Confirmation.json',
                     fit: BoxFit.contain,
@@ -81,35 +80,35 @@ class RedeemCodePanel extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
 
-          // === ROW: Code Input | Warning Info (half + half) ===
+          // === ROW: Left (Code + Button) | Right (Warnings + Instructions) ===
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Left half: Code Input
+                // LEFT: Code Input + Button
                 Expanded(
                   child: Form(
                     key: formKey,
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Text(
                           'Redemption Code',
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: 11,
                             fontWeight: FontWeight.w500,
                             color: AppColors.textPrimary,
                           ),
                         ),
-                        const SizedBox(height: 6),
+                        const SizedBox(height: 4),
                         TextFormField(
                           controller: codeController,
                           textCapitalization: TextCapitalization.characters,
                           style: const TextStyle(
-                            fontSize: 18,
+                            fontSize: 16,
                             fontWeight: FontWeight.bold,
                             letterSpacing: 3,
                           ),
@@ -117,44 +116,74 @@ class RedeemCodePanel extends StatelessWidget {
                           decoration: InputDecoration(
                             hintText: 'A3X9KL',
                             prefixIcon: const Icon(
-                                Icons.confirmation_number_outlined,
-                                size: 18),
+                                Icons.confirmation_number_outlined, size: 16),
                             filled: true,
                             fillColor: AppColors.grey100,
                             contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 14, vertical: 12),
+                                horizontal: 12, vertical: 10),
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide.none,
                             ),
                             enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide(
                                   color: AppColors.grey200, width: 1),
                             ),
                             focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide(
                                   color: AppColors.warning, width: 2),
                             ),
                           ),
                           validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Enter code';
-                            }
-                            if (value.length != 6) {
-                              return '6 chars';
-                            }
+                            if (value == null || value.isEmpty) return 'Enter code';
+                            if (value.length != 6) return '6 chars';
                             return null;
                           },
                           onChanged: (value) {
-                            codeController.value =
-                                codeController.value.copyWith(
+                            codeController.value = codeController.value.copyWith(
                               text: value.toUpperCase(),
-                              selection: TextSelection.collapsed(
-                                  offset: value.length),
+                              selection: TextSelection.collapsed(offset: value.length),
                             );
                           },
+                        ),
+                        const SizedBox(height: 10),
+                        // Button under code field
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: isLoading ? null : onRedeemCode,
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              backgroundColor: AppColors.warning,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              elevation: isLoading ? 0 : 1,
+                            ),
+                            child: isLoading
+                                ? const SizedBox(
+                                    height: 18,
+                                    width: 18,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                    ),
+                                  )
+                                : const Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.check_circle_outline, size: 16),
+                                      SizedBox(width: 5),
+                                      Text(
+                                        'Redeem Code',
+                                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                                      ),
+                                    ],
+                                  ),
+                          ),
                         ),
                       ],
                     ),
@@ -162,7 +191,7 @@ class RedeemCodePanel extends StatelessWidget {
                 ),
                 const SizedBox(width: 16),
 
-                // Right half: Warning Info
+                // RIGHT: Warnings + Instructions
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -170,18 +199,18 @@ class RedeemCodePanel extends StatelessWidget {
                       Text(
                         'Important',
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: 11,
                           fontWeight: FontWeight.w500,
                           color: AppColors.textPrimary,
                         ),
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 4),
                       Container(
                         width: double.infinity,
-                        padding: const EdgeInsets.all(14),
+                        padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
                           color: AppColors.warning.withValues(alpha: 0.06),
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(8),
                           border: Border.all(
                             color: AppColors.warning.withValues(alpha: 0.15),
                           ),
@@ -192,32 +221,32 @@ class RedeemCodePanel extends StatelessWidget {
                             Row(
                               children: [
                                 Icon(Icons.warning_amber_rounded,
-                                    color: AppColors.warning, size: 16),
-                                const SizedBox(width: 8),
+                                    color: AppColors.warning, size: 14),
+                                const SizedBox(width: 6),
                                 Expanded(
                                   child: Text(
-                                    'Approves transaction & consumes locked grams',
+                                    'Approves & consumes locked grams',
                                     style: TextStyle(
                                       color: AppColors.warning,
-                                      fontSize: 11,
+                                      fontSize: 10,
                                       height: 1.3,
                                     ),
                                   ),
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 8),
+                            const SizedBox(height: 4),
                             Row(
                               children: [
                                 Icon(Icons.schedule,
-                                    color: AppColors.error, size: 14),
-                                const SizedBox(width: 8),
+                                    color: AppColors.error, size: 13),
+                                const SizedBox(width: 6),
                                 Expanded(
                                   child: Text(
-                                    'Codes expire after 60 minutes',
+                                    'Expires after 60 min',
                                     style: TextStyle(
                                       color: AppColors.error,
-                                      fontSize: 11,
+                                      fontSize: 10,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
@@ -227,6 +256,8 @@ class RedeemCodePanel extends StatelessWidget {
                           ],
                         ),
                       ),
+                      const SizedBox(height: 10),
+                      const Instructions(),
                     ],
                   ),
                 ),
@@ -234,57 +265,6 @@ class RedeemCodePanel extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 14),
-
-          // === Submit Button ===
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: ElevatedButton(
-              onPressed: isLoading ? null : onRedeemCode,
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                backgroundColor: AppColors.warning,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                elevation: isLoading ? 0 : 1,
-              ),
-              child: isLoading
-                  ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2.5,
-                        valueColor:
-                            AlwaysStoppedAnimation<Color>(Colors.white),
-                      ),
-                    )
-                  : const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.check_circle_outline, size: 18),
-                        SizedBox(width: 6),
-                        Text(
-                          'Redeem Code',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          // === DIVIDER ===
-          Divider(height: 1, color: AppColors.grey200),
-
-          // === BOTTOM: Instructions ===
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 14, 20, 16),
-            child: const Instructions(),
-          ),
         ],
       ),
     );
