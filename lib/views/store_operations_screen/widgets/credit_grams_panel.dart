@@ -66,7 +66,7 @@ class CreditGramsPanel extends StatelessWidget {
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
-          child: Form(
+        child: Form(
             key: formKey,
             child: Column(
               mainAxisSize: MainAxisSize.min,
