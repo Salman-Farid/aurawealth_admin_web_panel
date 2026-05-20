@@ -23,7 +23,6 @@ class _BroadcastNotificationCardState
   final TextEditingController _titleCtrl = TextEditingController();
   final TextEditingController _bodyCtrl = TextEditingController();
   final TextEditingController _imageCtrl = TextEditingController();
-  final TextEditingController _dataCtrl = TextEditingController();
 
   bool _includeImage = false;
 
@@ -32,7 +31,6 @@ class _BroadcastNotificationCardState
     _titleCtrl.dispose();
     _bodyCtrl.dispose();
     _imageCtrl.dispose();
-    _dataCtrl.dispose();
     super.dispose();
   }
 
@@ -52,7 +50,7 @@ class _BroadcastNotificationCardState
         borderSide: const BorderSide(color: _accent, width: 1.5),
       ),
       contentPadding:
-          const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
     );
   }
 
@@ -77,21 +75,21 @@ class _BroadcastNotificationCardState
         children: [
           _header(),
           Padding(
-            padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+            padding: const EdgeInsets.fromLTRB(20, 14, 20, 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _warningBanner(),
-                const SizedBox(height: 22),
+                const SizedBox(height: 16),
                 _section('CONTENT'),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 TextField(
                   controller: _titleCtrl,
                   decoration: _inputDeco('Title', Icons.title_rounded),
                   maxLength: 100,
                   style: const TextStyle(fontSize: 14),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
                 TextField(
                   controller: _bodyCtrl,
                   decoration:
@@ -100,12 +98,12 @@ class _BroadcastNotificationCardState
                   maxLength: 250,
                   style: const TextStyle(fontSize: 14),
                 ),
-                const SizedBox(height: 22),
+                const SizedBox(height: 16),
                 _section('MEDIA & DATA'),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 _imageToggle(),
                 if (_includeImage) ...[
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 10),
                   TextField(
                     controller: _imageCtrl,
                     decoration:
@@ -113,15 +111,7 @@ class _BroadcastNotificationCardState
                     style: const TextStyle(fontSize: 14),
                   ),
                 ],
-                const SizedBox(height: 12),
-                TextField(
-                  controller: _dataCtrl,
-                  decoration: _inputDeco(
-                      'Custom JSON', Icons.data_object_rounded),
-                  maxLines: 2,
-                  style: const TextStyle(fontSize: 14),
-                ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 18),
                 _broadcastBtn(),
               ],
             ),
@@ -136,21 +126,21 @@ class _BroadcastNotificationCardState
 
   Widget _header() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 18),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       decoration: BoxDecoration(
         color: _accent.withValues(alpha: 0.04),
         border: Border(bottom: BorderSide(color: AppColors.grey200)),
       ),
       child: Row(children: [
         Container(
-          width: 42,
-          height: 42,
+          width: 36,
+          height: 36,
           decoration: BoxDecoration(
             color: _accent.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(11),
+            borderRadius: BorderRadius.circular(9),
           ),
           child: const Icon(Icons.campaign_outlined,
-              color: _accent, size: 22),
+              color: _accent, size: 20),
         ),
         const SizedBox(width: 14),
         Expanded(
@@ -175,7 +165,7 @@ class _BroadcastNotificationCardState
 
   Widget _warningBanner() {
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: const Color(0xFFFFF8E1),
         borderRadius: BorderRadius.circular(12),
@@ -184,14 +174,14 @@ class _BroadcastNotificationCardState
       ),
       child: Row(children: [
         Container(
-          width: 32,
-          height: 32,
+          width: 28,
+          height: 28,
           decoration: BoxDecoration(
             color: const Color(0xFFFF9800).withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(8),
           ),
           child: const Icon(Icons.warning_amber_rounded,
-              color: Color(0xFFFF9800), size: 18),
+              color: Color(0xFFFF9800), size: 16),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -243,7 +233,7 @@ class _BroadcastNotificationCardState
       final sending = _controller.isSending.value;
       return SizedBox(
         width: double.infinity,
-        height: 48,
+        height: 42,
         child: ElevatedButton(
           onPressed: sending ? null : _handleBroadcast,
           style: ElevatedButton.styleFrom(
@@ -278,8 +268,6 @@ class _BroadcastNotificationCardState
     final title = _titleCtrl.text.trim();
     final body = _bodyCtrl.text.trim();
     final imageUrl = _includeImage ? _imageCtrl.text.trim() : null;
-    final dataJson = _dataCtrl.text.trim();
-
     if (title.isEmpty || body.isEmpty) {
       Get.snackbar('Error', 'Title and body are required',
           snackPosition: SnackPosition.BOTTOM,
@@ -310,24 +298,10 @@ class _BroadcastNotificationCardState
 
     if (confirmed != true) return;
 
-    Map<String, dynamic>? data;
-    if (dataJson.isNotEmpty) {
-      try {
-        data = Map<String, dynamic>.from(jsonDecode(dataJson));
-      } catch (_) {
-        Get.snackbar('Error', 'Invalid JSON format',
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: AppColors.error,
-            colorText: Colors.white);
-        return;
-      }
-    }
-
     final response = await _controller.sendBroadcast(
       title: title,
       body: body,
       imageUrl: imageUrl,
-      data: data,
     );
 
     if (response != null && response.success) {
@@ -352,7 +326,6 @@ class _BroadcastNotificationCardState
     _titleCtrl.clear();
     _bodyCtrl.clear();
     _imageCtrl.clear();
-    _dataCtrl.clear();
     setState(() => _includeImage = false);
   }
 }

@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
@@ -23,7 +22,6 @@ class _TargetedNotificationCardState extends State<TargetedNotificationCard> {
   final TextEditingController _titleCtrl = TextEditingController();
   final TextEditingController _bodyCtrl = TextEditingController();
   final TextEditingController _imageCtrl = TextEditingController();
-  final TextEditingController _dataCtrl = TextEditingController();
 
   String? _selectedUserId;
   bool _includeImage = false;
@@ -33,7 +31,6 @@ class _TargetedNotificationCardState extends State<TargetedNotificationCard> {
     _titleCtrl.dispose();
     _bodyCtrl.dispose();
     _imageCtrl.dispose();
-    _dataCtrl.dispose();
     super.dispose();
   }
 
@@ -52,7 +49,7 @@ class _TargetedNotificationCardState extends State<TargetedNotificationCard> {
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(color: AppColors.primary, width: 1.5),
       ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
     );
   }
 
@@ -78,23 +75,23 @@ class _TargetedNotificationCardState extends State<TargetedNotificationCard> {
             children: [
               _header(),
               Padding(
-                padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
+                padding: const EdgeInsets.fromLTRB(20, 14, 20, 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _section('RECIPIENT'),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 6),
                     _userDropdown(),
-                    const SizedBox(height: 22),
+                    const SizedBox(height: 16),
                     _section('CONTENT'),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 6),
                     _field(
                       _titleCtrl,
                       'Title',
                       Icons.title_rounded,
                       maxLen: 100,
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 10),
                     _field(
                       _bodyCtrl,
                       'Message',
@@ -102,22 +99,15 @@ class _TargetedNotificationCardState extends State<TargetedNotificationCard> {
                       lines: 3,
                       maxLen: 250,
                     ),
-                    const SizedBox(height: 22),
+                    const SizedBox(height: 16),
                     _section('MEDIA & DATA'),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 6),
                     _imageToggle(),
                     if (_includeImage) ...[
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 10),
                       _field(_imageCtrl, 'Image URL', Icons.link_rounded),
                     ],
-                    const SizedBox(height: 12),
-                    _field(
-                      _dataCtrl,
-                      'Custom JSON',
-                      Icons.data_object_rounded,
-                      lines: 2,
-                    ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 18),
                     _sendBtn(),
                   ],
                 ),
@@ -134,7 +124,7 @@ class _TargetedNotificationCardState extends State<TargetedNotificationCard> {
   Widget _header() {
     const accent = Color(0xFF0288D1);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 18),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       decoration: BoxDecoration(
         color: accent.withValues(alpha: 0.04),
         border: Border(bottom: BorderSide(color: AppColors.grey200)),
@@ -142,16 +132,16 @@ class _TargetedNotificationCardState extends State<TargetedNotificationCard> {
       child: Row(
         children: [
           Container(
-            width: 42,
-            height: 42,
+            width: 36,
+            height: 36,
             decoration: BoxDecoration(
               color: accent.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(11),
+              borderRadius: BorderRadius.circular(9),
             ),
             child: const Icon(
               Icons.person_outline_rounded,
               color: accent,
-              size: 22,
+              size: 20,
             ),
           ),
           const SizedBox(width: 14),
@@ -322,7 +312,7 @@ class _TargetedNotificationCardState extends State<TargetedNotificationCard> {
       final sending = _controller.isSending.value;
       return SizedBox(
         width: double.infinity,
-        height: 48,
+        height: 42,
         child: FilledButton.icon(
           onPressed: sending ? null : _handleSend,
           icon: sending
@@ -358,8 +348,6 @@ class _TargetedNotificationCardState extends State<TargetedNotificationCard> {
     final imageUrl = _includeImage && rawImageUrl.isNotEmpty
         ? rawImageUrl
         : null;
-    final dataJson = _dataCtrl.text.trim();
-
     if (title.isEmpty || body.isEmpty) {
       Get.snackbar(
         'Error',
@@ -381,22 +369,6 @@ class _TargetedNotificationCardState extends State<TargetedNotificationCard> {
       return;
     }
 
-    Map<String, dynamic>? data;
-    if (dataJson.isNotEmpty) {
-      try {
-        data = Map<String, dynamic>.from(jsonDecode(dataJson));
-      } catch (_) {
-        Get.snackbar(
-          'Error',
-          'Invalid JSON format',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: AppColors.error,
-          colorText: Colors.white,
-        );
-        return;
-      }
-    }
-
     final selectedUser = _userController.findUser(_selectedUserId!);
     final targetUserId = _notificationTargetUserId(selectedUser);
 
@@ -416,7 +388,6 @@ class _TargetedNotificationCardState extends State<TargetedNotificationCard> {
       title: title,
       body: body,
       imageUrl: imageUrl,
-      data: data,
     );
 
     if (response != null && response.success) {
@@ -466,7 +437,6 @@ class _TargetedNotificationCardState extends State<TargetedNotificationCard> {
     _titleCtrl.clear();
     _bodyCtrl.clear();
     _imageCtrl.clear();
-    _dataCtrl.clear();
     setState(() {
       _selectedUserId = null;
       _includeImage = false;
