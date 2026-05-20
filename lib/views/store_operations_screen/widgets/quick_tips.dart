@@ -12,43 +12,42 @@ class QuickTips extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppColors.grey100,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.grey200),
+        color: AppColors.grey100.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(Icons.tips_and_updates, size: 16, color: AppColors.grey600),
-              const SizedBox(width: 8),
+              Icon(Icons.tips_and_updates, size: 14, color: AppColors.grey500),
+              const SizedBox(width: 6),
               Text(
                 'Quick Tips',
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: 11,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.grey700,
+                  color: AppColors.grey600,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           ...tips.map((tip) => Padding(
-                padding: const EdgeInsets.only(bottom: 6),
+                padding: const EdgeInsets.only(bottom: 5),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Icon(Icons.check_circle,
-                        size: 14, color: AppColors.success),
-                    const SizedBox(width: 8),
+                        size: 13, color: AppColors.success),
+                    const SizedBox(width: 6),
                     Expanded(
                       child: Text(
                         tip,
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: 11,
                           color: AppColors.grey600,
                         ),
                       ),
